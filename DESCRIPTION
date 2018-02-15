@@ -1,0 +1,30 @@
+Package: moloc
+Type: Package
+Title: Multiple Traits Co-localization
+Version: 0.1.0
+Authors@R: c(
+    person("Claudia", "Giambartolomei", email = "claudia.giambartolomei@gmail.com", role = c("aut", "cre")),
+    person("Jimmy", "Liu", email = "jliu@nygenome.org", role = "aut"))
+Author: Claudia Giambartolomei [aut, cre],
+    Jimmy Liu [aut]
+Maintainer: Claudia Giambartolomei <claudia.giambartolomei@gmail.com>
+URL: http://github.com/clagiamba/moloc
+BugReports: http://github.com/clagiamba/moloc/issues
+Description: This package is an extension of coloc, a Bayesian method to co-
+    localize genetic associations with multiple traits at a locus.
+License: 
+Encoding: UTF-8
+LazyData: true
+Imports:
+    mvtnorm (>= 1.0.5),
+    data.table (>= 1.9.6),
+    GenomicRanges (>= 1.24.3)
+Suggests:
+    foreach (>= 1.4.3),
+    doParallel (>= 1.0.10),
+    data.table (>= 1.9.6),
+    knitr,
+    rmarkdown,
+    testthat
+RoxygenNote: 5.0.1
+VignetteBuilder: knitr

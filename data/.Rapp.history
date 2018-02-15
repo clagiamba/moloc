@@ -1,0 +1,2 @@
+load("/Users/claudiagiambartolomei/Dropbox/coloc3/moloc/moloc/data/data_genome.RData")
+load("/Users/claudiagiambartolomei/Dropbox/coloc3/moloc/moloc/data/ensemble_Homo_sapiens.GRCh37.70.processed.rda")

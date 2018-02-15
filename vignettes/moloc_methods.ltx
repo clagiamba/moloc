@@ -1,0 +1,244 @@
+%\VignetteIndexEntry{moloc methods}
+%\VignetteEngine{R.rsp::tex}
+%\VignetteKeyword{R}
+%\VignetteKeyword{package}
+%\VignetteKeyword{vignette}
+%\VignetteKeyword{LaTeX}
+
+
+\documentclass{article}
+\usepackage[square,sort&compress]{natbib}
+\bibliographystyle{genres}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage[a4paper, total={7in, 8in}]{geometry} %{5.5in, 8in}]{geometry}
+
+% no indent
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{\baselineskip}
+
+% double spacing
+%\usepackage{setspace}
+%\doublespacing
+
+\begin{document}
+
+\section*{Methods}
+
+\section*{Overview of the moloc method}
+
+We extended the model from Pickrell (doi: 10.1038/ng.3570) and {\it coloc} to analyze jointly more than two traits. 
+We will use colocalization of three traits, a, b and c, to illustrate how the model can be extended to any number of traits. 
+For each variant, we assume a simple linear regression model to relate the vector of phenotypes $\vec{y}$ or a log-odds generalized linear model for the case-control dataset, and the vector of genotypes $\vec{x}$:
+
+% $$Y = \mu + \beta X + \epsilon$$
+$$E[y_i] = \beta x_i $$
+
+We define a genomic region containing $Q$ variants, for example a {\it cis} region around expression or methylation probe.
+We are interested in a situation where summary statistics (effect size estimates and standard errors) are available for all datasets in a genomic region with $Q$ variants. \\
+
+We make two important assumptions. Firstly that the causal variant is included in the set of $Q$ common variants, either directly typed or well imputed. If the causal SNP is not present, the power to detect a common variant will be reduced depending on the LD between the causal SNP and the included SNPs (see {\it coloc} paper). Secondly, we assume at most one association is present for each trait. Thus, for three traits, there can be up to three causal variants and 15 possible configurations of how they are shared among the traits. 
+In the presence of multiple causal variants per trait, this algorithm is not able to identify colocalization between additional association signals independent from the primary one. Although this is a limitation, these cases are rare and the advantage of using more complex models that require LD is still unclear (Paintor, eCAVIAR, etc) [ in Discussion ].
+
+The algorithm estimates the evidence in support of different scenarios. In the three-trait situation, we wish to estimate posterior probabilities for fifteen possible configurations. Four examples of configurations are show in in Figure X. We are most interested in the scenarios supporting a shared causal variant for two and three traits. 
+
+This algorithm requires the definition of prior probabilities at the SNP level. The probability of the data under each hypothesis is computed by combining the regional Bayes factor with the priors to assess the support for each scenario.
+We evaluated the method in simulations and found that the priors with the greatest power are using $1 \times 10^{-4}$ for 
+the prior probability of a SNP being associated with each trait,  $1 \times 10^{-7}$ for the SNP being associated with two traits, and  $1 \times 10^{-7}$ for a SNP being associated with all three traits. 
+For the WABF, we averaged BF between three prior variances of (0.01, 0.1, 0.5).
+
+%It is possible that more than one SNP is causal for a trait in a test region. However, in the probable case that one effect is stronger than another, the method effectively tests colocalisation of the strongest effect(s)
+
+\section*{Bayes Factor computation}
+
+% The probability space for a single SNP can be fully partitioned into ($p_0, p_1, p_2, p_3, p_{12}, p_{13}, p_{23}, p_{123}$), where $p_0$ is the prior probability that a SNP is not associated with either trait; $p_1$, $p_1$, $p_1$ is defined as the prior probability that the SNP is only associated with trait 1, $p_2$ the prior probability that the SNP is associated only with trait 2, $p_3$ is the prior probability that the SNP is associated with trait 3, while $p_{12}$ is the prior probability that the SNP is associated with trait 1 and 2, . We therefore have: $$p_0 + p_1 + p_2 + p_{12} = 1$$ 
+
+Bayes factors for association measure the relative support for different models in which the SNP is associated with 1 or more traits, compared to the null model of no association. 
+
+\noindent In the three-trait situation, for a single SNP there are eight possible models to consider: \\
+M0: the SNP is associated with none of the traits; \\
+M1: the SNP is associated with trait 1 (but not trait 2 nor trait 3); \\
+M2: the SNP is associated with trait 2 (but not trait 1 nor trait 3); \\
+M3: the SNP is associated with trait 3 (but not trait 1 nor trait 2); \\
+M4: the SNP is associated with both trait 1 and trait 2 (but not trait 3); \\
+M5: the SNP is associated with both trait 1 and trait 3 (but not trait 2); \\
+M6: the SNP is associated with both trait 2 and trait 3 (but not trait 1); \\
+M7: the SNP is associated with all traits.
+
+To compute the Bayes Factors (BFs) for each SNP under one of these models, we make use of the Asymptotic Bayes Factor derivation \cite{Wakefield2009}. Let $\hat{\beta}$ be the maximum likelihood estimator of $\beta$, and $\sqrt{V}$ be  the standard error of that estimate, in an asymptotic setting $\hat{\beta} \to N(\beta, V)$. If we assume that the effect size $\beta = 0$ under the null, while under the alternative, $\beta \to N(0, W)$, to compute the WABF we only need Z-scores from a standard regression output, and $\sqrt{W}$, the standard deviation of the normal prior N(0,W) on $\beta$.
+We average over Bayes factors using W = 0.01, W = 0.1, and W = 0.5.
+
+\begin{equation}
+WABF = \frac{1}{\sqrt{1-r}} \times exp \left[ - \frac{Z^2}{2} \times r \right]
+\label{abf}
+\end{equation}
+
+where $Z=\hat{\beta}/\sqrt{V}$ is the usual Z statistic and the shrinkage factor r is the ratio of the variance of the prior and total variance ($r = W/(V+W)$). % (variance of beta + variance of prior for beta). 
+
+To simplify computations, following Pickrell2014 we use the reverse regression model where the genotypes and phenotypes are swapped. The WABF are identical as long as the shrinkage factor $r$ remains the same. 
+
+%The Bayes factor quantities are estimated from summary statistics using the Asymptotic Bayes Factor derivation \cite{Wakefield2009}. 
+%under the null we assume that the effect size $\beta = 0$.
+%Under the alternative, $\beta$ is normally distributed with mean $0$ and variance $W$.
+
+%\noindent $BF_3$ results from the assumption that the traits are independent and do not share overlapping controls. We relax this assumption later on. In general, across a set of traits $N = \big\{1,2,3...\big\}$, let $N_m \subseteq N$ be the subset of traits that share this SNP as a causal variant. The evidence to support the various combinations of $N_M$ is:
+
+The evidence in support of one of the models with $>$1 trait is:
+\begin{equation}
+BF^{(m)} = \prod_{i \in m} WABF_i
+\end{equation}
+
+A key assumption is that the traits do not share overlapping individuals. We could relax this assumption as in Pickrell2014. 
+% Two key assumptions are necessary for the following computations. Firstly that the traits are measured in unrelated individuals, and secondly that the effect sizes for the two traits are independent.
+
+For each SNP, we assign a prior probability according to how many traits that SNP is associated with, and constant across SNPs (see section below). 
+% \noindent and $\pi_0 + \pi_1 + \pi_2 + \pi_3 = 1$. In theory, we can set a different prior for each SNP and each combination $N_m$, though in practice, we assign prior probabilities according to how many traits that SNP is associated with (and constant across SNPs). 
+
+
+\section*{Regional Bayes Factors and Posterior computations}
+
+We now turn our attention to estimating the support for possible scenarios in a given genomic region. 
+If we consider three traits, we have 15 possible hypotheses. 
+% by summing over all configurations which are consistent with a given hypothesis $H_h$, 
+We can compute the probabilities given the data for each of these hypothesis by summing over the relevant configurations.
+For each configuration $S$ and observed data $D$, The likelihood of configuration $h$ relative to the null ($H_0$) is given by:
+\begin{equation}
+\label{rbf_equation}
+\frac{P(H_h \mid D)}{P(H_0 \mid D)} = \sum_{S \in S_h} \frac{P(D \mid S)}{P(D \mid S_0)} \times \frac{P(S)}{P(S_0)}
+\end{equation}
+
+\noindent where, $\frac{P(D \mid S)}{P(D \mid S_0)}$ is the Bayes Factor for each configuration, and $\frac{P(S)}{P(S_0)}$ is the prior odds of a configuration compared with the baseline configuration $S_0$.
+
+% \noindent where \textit{P(S)} is the prior probability of a configuration, $P(D \mid S)$ is the probability of the observed data \textit{D} given a configuration \textit{S}, and the sum is over all configurations \textit{S} which are consistent with a given hypothesis $H_h$, where \textit{h}=(1..14).  
+
+%\begin{equation}
+%\frac{P(H_h | D)}{P(H_0 | D)} = \sum_{S\in{S_h}} \frac{P(D \mid S)}{P(D \mid S_0)} \times \frac{P(S)}{P(S_0)} 
+%\label{likelihood.incr} 
+%\end{equation}
+%The first ratio in this equation is a Bayes Factor (BF) for each configuration, and the second ratio is the prior odds of a configuration compared with the baseline configuration $S_0$. 
+
+The Regional Bayes Factors for the 15 possible scenarios is then:
+\begin{align}
+& RBF_a =  \sum_{i=1}^Q \pi^{(1)} WABF_i^{(1)}  \\
+& RBF_b =  \sum_{i=1}^Q \pi^{(2)} WABF_i^{(2)} \\
+& RBF_c =  \sum_{i=1}^Q \pi^{(3)} WABF_i^{(3)}  \\
+& RBF_{ab} = \sum_{i=1}^Q \pi^{(1,2)} WABF_i^{(1)} WABF_i^{(2)} \\
+& RBF_{a.b} = \sum_{i=1}^Q \sum_{j=1}^Q \pi^{(1)} \pi^{(2)} WABF_i^{(1)} WABF_j^{(2)} I[i \ne\ j] \\
+&  RBF_{bc} = \sum_{i=1}^Q \pi^{(2,3)} WABF_i^{(2)} WABF_i^{(3)} \\
+&  RBF_{b.c} = \sum_{i=1}^Q \sum_{j=1}^Q \pi^{(2)} \pi^{(3)} WABF_i^{(2)} WABF_j^{(3)} I[i \ne\ j] \\
+&  RBF_{ac} = \sum_{i=1}^Q  \pi^{(1,3)} WABF_i^{(1)} WABF_i^{(3)} \\
+&  RBF_{a.c} =\sum_{i=1}^Q \sum_{j=1}^Q \pi^{(1)} \pi^{(3)} WABF_i^{(1)} WABF_j^{(3)} I[i \ne\ j] \\
+&  RBF_{ab.c} = \sum_{i=1}^Q \sum_{j=1}^Q \pi^{(1,2)} \pi^{(3)} WABF_i^{(1)} WABF_i^{(2)} WABF_j^{(3)} I[i \ne\ j] \\
+&  RBF_{a.bc} =\sum_{i=1}^Q \sum_{j=1}^Q \pi^{(1)} \pi^{(2,3)} WABF_i^{(1)} WABF_j^{(2)} WABF_j^{(3)} I[i \ne\ j] \\
+&  RBF_{ac.b} = \sum_{i=1}^Q \sum_{j=1}^Q \pi^{(1,2)} \pi^{(3)}WABF_i^{(1)} WABF_i^{(2)} WABF_j^{(3)} I[i \ne\ j] \\
+&  RBF_{abc} = \sum_{i=1}^Q \pi^{(1,2,3)} WABF_i^{(1)} WABF_i^{(2)} WABF_i^{(3)} \\
+&  RBF_{a.b.c} =\sum_{i=1}^Q \sum_{j=1}^Q \sum_{k=1}^Q \pi^{(1)} \pi^{(2)} \pi^{(3)} WABF_i^{(1)} WABF_j^{(2)} WABF_k^{(3)} I[i \ne\ j,  i \ne\ k, j \ne\ k]
+%**% & RBF_a =  \sum_{i=1}^Q \pi_i^{(1)} WABF_{ai} \\
+%**% & RBF_b =  \sum_{i=1}^Q \pi_i^{(2)} WABF_{bi} \\
+%**% & RBF_c =  \sum_{i=1}^Q \pi_i^{(3)} WABF_{ci} \\
+%**% & RBF_{ab} = \sum_{i=1}^Q \pi_i^{(1,2)} WABF_{ai} WABF_{bi} \\
+%**% & RBF_{a.b} = \sum_{i=1}^Q \sum_{j=1}^Q \pi_i^{(1)} \pi_j^{(2)} WABF_{ai} WABF_{bj} I[i \ne\ j] \\
+%**% &  RBF_{bc} = \sum_{i=1}^Q \pi_i^{(2,3)} WABF_{bi} WABF_{ci} \\
+%**% &  RBF_{b.c} = \sum_{i=1}^Q \sum_{j=1}^Q \pi_i^{(2)} \pi_j^{(3)} WABF_{bi} WABF_{cj} I[i \ne\ j] \\
+%**% &  RBF_{ac} = \sum_{i=1}^Q  \pi_i^{(1,3)} WABF_{ai} WABF_{ci} \\
+%**% &  RBF_{a.c} =\sum_{i=1}^Q \sum_{j=1}^Q \pi_i^{(1)} \pi_j^{(3)} WABF_{ai} WABF_{cj} I[i \ne\ j] \\
+%**% &  RBF_{ab.c} = \sum_{i=1}^Q \sum_{j=1}^Q \pi_i^{(1,2)} \pi_j^{(3)} WABF_{ai} WABF_{bi} WABF_{cj} I[i \ne\ j] \\
+%**% &  RBF_{a.bc} =\sum_{i=1}^Q \sum_{j=1}^Q \pi_i^{(1)} \pi_j^{(2,3)} WABF_{ai} WABF_{bj} WABF_{cj} I[i \ne\ j] \\
+%**% &  RBF_{ac.b} = \sum_{i=1}^Q \sum_{j=1}^Q \pi_i^{(1,2)} \pi_j^{(3)}WABF_{ai} WABF_{ci} WABF_{bj} I[i \ne\ j] \\
+%**% &  RBF_{abc} = \sum_{i=1}^Q \pi_i^{(1,2,3)} WABF_{ai} WABF_{bi} WABF_{ci} \\
+%**% &  RBF_{a.b.c} =\sum_{i=1}^Q \sum_{j=1}^Q \sum_{k=1}^Q \pi_i^{(1)} \pi_j^{(2)} \pi_k^{(3)} WABF_{ai} WABF_{bj} WABF_{ck} I[i \ne\ j,  i \ne\ k, j \ne\ k] \\
+%& RBF_b =  RBF^{(2)} = \sum_{i=1}^Q \pi_{bi} WABF_{bi} \\
+%& RBF_c =  RBF^{(3)} = \sum_{i=1}^Q \pi_{ci} WABF_{ci} \\
+%& RBF_{ab} =  RBF^{(1,2)} = \sum_{i=1}^Q \pi_{abi} WABF_{ai} WABF_{bi} \\
+%& RBF_{a.b} = RBF^{(1)(2)} = \sum_{i=1}^Q \sum_{j=1}^Q \pi_{ai} \pi_{bj} WABF_{ai} WABF_{bj} I[i \ne\ j] \\
+%&  RBF_{bc} =  RBF^{(2,3)} =\sum_{i=1}^Q \pi_{bci} WABF_{bi} WABF_{ci} \\
+%&  RBF_{b.c} = RBF^{(2)(3)} = \sum_{i=1}^Q \sum_{j=1}^Q \pi_{bi} \pi_{cj} WABF_{bi} WABF_{cj} I[i \ne\ j] \\
+%&  RBF_{ac} = RBF^{(1,3)} = \sum_{i=1}^Q WABF_{ai} WABF_{ci} \\
+%&  RBF_{a.c} =  RBF^{(1),(3)} =\sum_{i=1}^Q \sum_{j=1}^Q \pi_{ai} \pi_{cj} WABF_{ai} WABF_{cj} I[i \ne\ j] \\
+%&  RBF_{ab.c} = RBF^{(1,2)(3)} = \sum_{i=1}^Q \sum_{j=1}^Q \pi_{abi} \pi_{cj} WABF_{ai} WABF_{bi} WABF_{cj} I[i \ne\ j] \\
+%&  RBF_{a.bc} = RBF^{(1)(2,3)} =\sum_{i=1}^Q \sum_{j=1}^Q \pi_{ai} \pi_{bcj} WABF_{ai} WABF_{bj} WABF_{cj} I[i \ne\ j] \\
+%&  RBF_{ac.b} = RBF^{(1,2)(3)} =\sum_{i=1}^Q \sum_{j=1}^Q \pi_{aci} \pi_{bj}WABF_{ai} WABF_{ci} WABF_{bj} I[i \ne\ j] \\
+%&  RBF_{abc} = RBF^{(1,2,3)} = \sum_{i=1}^Q \pi_{abci} WABF_{ai} WABF_{bi} WABF_{ci} \\
+%&  RBF_{a.b.c} = RBF^{(1)(2)(3)} =\sum_{i=1}^Q \sum_{j=1}^Q \sum_{k=1}^Q \pi_{ai} \pi_{bj} \pi_{ck} WABF_{ai} WABF_{bj} WABF_{ck} I[i \ne\ j,  i \ne\ k, j \ne\ k] \\
+\end{align}
+
+%We set $\pi_{ai} = \pi_{bi} = \pi_{ci}$,
+% $\pi_{abi} = \pi_{aci} = \pi_{cbi}$,
+
+The equations for the model with no colocalization can be re-written in terms of the model with colocalization. 
+
+%\begin{equation}
+%\frac{P(H_3|D)}{P(H_0|D)} = \pi_1 \times \pi_2 \times \sum_{j=1}^Q BF_{1j} \sum_{j=1}^Q BF_{2j} - \bigg[\frac{\pi_1 \times \pi_2}{\pi_3} \times \frac{P(H_4|D)}{P(H_0|D)} \bigg]
+%\end{equation}
+
+%Thus, using the $BF$s for each SNP and set prior probabilities, the likelihood of the data for the fifteen possible configurations can be simplified to:
+
+For example, the RBF for non-colocalized signals above would be:
+\begin{align}
+& RBF_{a.b} =  RBF_a  \times RBF_b - \frac{\pi^{(1)} \times\pi^{(2)} }{\pi^{(1,2)}} \times RBF_{ab} \\
+&  RBF_{b.c} =  RBF_b \times RBF_c - \frac{\pi^{(2)} \times \pi^{(3)}}{\pi^{(2,3)}} \times RBF_{bc} \\
+&  RBF_{a.c} =  RBF_a \times RBF_c  - \frac{\pi^{(1)} \times \pi^{(3)}}{\pi^{(1,3)}} \times RBF_{ac} \\
+&  RBF_{ab.c} = RBF_{ab} \times RBF_c - \frac{ \pi^{(1,2)} \times \pi^{(3)}}{\pi^{(1,2,3)}} \times RBF_{abc} \\
+&  RBF_{a.bc} = RBF_{a} \times RBF_{bc} - \frac{ \pi^{(1)} \times \pi^{(2,3)}}{\pi^{(1,2,3)}} \times RBF_{abc} \\
+&  RBF_{ac.b} =  RBF_{ac} \times RBF_{b} - \frac{ \pi^{(1,3)} \times \pi^{(2)}}{\pi^{(1,2,3)}} \times RBF_{abc} \\
+&  RBF_{a.b.c} =  RBF_{a} \times RBF_{b} \times RBF_{c} - \frac{ \pi^{(1)} \times \pi^{(2)} \times \pi^{(3)}}{\pi^{(1,2,3)}} \times RBF_{abc}
+%& RBF_a =  \pi^{(1)} \times RBF_a \\
+%& RBF_b =  \pi^{(2)} \times RBF_b \\
+%& RBF_c = \pi^{(3)} \times RBF_c \\
+%& RBF_{ab} =   \pi^{(1,2)} \times RBF_{ab} \\
+%& RBF_{a.b} =  \pi^{(1)} \times \pi^{(2)} \times RBF_a  \times RBF_b - \frac{\pi^{(1)} \times\pi^{(2)} }{\pi^{(1,2)}} \times RBF_{ab} \\
+%&  RBF_{bc} =   \pi^{(2,3)} \times \sum_{j=1}^Q WABF_{bj} WABF_{cj} \\
+%&  RBF_{b.c} =   \pi^{(2)} \times \pi^{(3)} \times \sum_{i=1}^Q WABF_{bj} \sum_{j=1}^Q WABF_{cj} - \frac{\pi^{(2)} \times \pi^{(3)}}{\pi^{(2,3)}} \times RBF_{bc} I[j \ne\ k] \\
+%&  RBF_{ac} =  \pi^{(1,3)} \times \sum_{j=1}^Q WABF_{aj} WABF_{cj} \\
+%&  RBF_{a.c} =   \pi^{(1)} \times \pi^{(3)} \times \sum_{i=1}^Q WABF_{aj} \sum_{k=1}^Q WABF_{cj} - \frac{\pi^{(1)} \times \pi^{(3)}}{\pi^{(1,3)} \times RBF_{ac} I[i \ne\ k] \\
+%&  RBF_{ab.c} =  \pi^{(1,2)} \times  \pi^{(3)}  \times \sum_{j=1}^Q WABF_{aj} WABF_{bj} \times \sum_{j=1}^Q WABF_{cj} - \frac{ \pi^{(1,2)} \times \pi^{(3)}{\pi^{(1,2,3)} \times RBF_{abc} I[ i=j, i\ne\ k,  j \ne\ k] \\
+%&  RBF_{a.bc} =  \pi^{(1)} \pi^{(2,3)}  \times \sum_{j=1}^Q WABF_{bj} WABF_{cj} \times \sum_{j=1}^Q WABF_{aj} - \frac{\pi_5 \times \pi_1}{\pi_7} \times RBF_{abc} I[ j=k, i\ne\ j,  i \ne\ k] \\
+%&  RBF_{ac.b} =  \pi_6 \times \pi_2  \times \sum_{j=1}^Q BF_{aj} BF_{cj} \times \sum_{j=1}^Q BF_{bj} - \frac{\pi_6 \times \pi_2}{\pi_7} \times RBF_{abc} I[ i=k, j\ne\ k,  j \ne\ i] \\
+%&  RBF_{a.b.c} =  \pi_1 \times \pi_2 \times \pi_3  \times \sum_{j=1}^Q \sum_{j=1}^Q \sum_{k=1}^Q  WABF_{aj}  WABF_{bj} WABF_{ck} I[i \ne\ j,  i \ne\ k, j \ne\ k] = \\
+%& \pi_1 \times  \pi_2  \times \pi_3 \times \sum_{j=1}^Q WABF_{aj} \sum_{j=1}^Q WABF_{bj}  \sum_{j=1}^Q WABF_{cj}  - \frac{\pi_1 \times  \pi_2 \times pi_3}{\pi_7} \times RBF_{abc} \\
+%&  RBF_{abc} =   \pi_{7} \times \sum_{j=1}^Q BF_{aj} BF_{bj} BF_{cj} \\
+\end{align}
+
+%\noindent The likelihood of there being a set of $m$ causal associations among $M$ number of traits can be generalized as:
+%\begin{equation}
+%\frac{P(H_h|D)}{P(H_0|D)} = \prod_{i \in m} \pi^{(i)} \sum_{j=1}^Q BF_j^{(i)} - \frac{\prod_{i \in m} \pi^{(i)}}{\pi^{(1,2,...M)}} \sum_{j=1}^Q \pi^{(1,2,...M)} BF_j^{(1,2,...m)}
+%\end{equation}
+
+%\noindent Here, the superscripts $(i)$ above $\pi$ and $BF$ indicate the posterior probability and Bayes factor respectively that the combination of traits $i$ share a common causal variant.
+
+
+If priors do not vary across SNPs under the same hypotheses, we can multiply the likelihoods by one common prior. 
+%\begin{equation}
+%P(H_h \mid D) =\sum_{S \in S_h} P(D \mid S)P(S)= P(S \mid S \in S_h) \times \sum_{S \in S_h} P(D \mid S)
+%\label{simplified.lik}
+%\end{equation}
+\noindent We set $\pi^{(1)} = \pi^{(2)} = \pi^{(3)}$, i.e. we set the prior probability that SNP i is the causal one for each trait, to be identical, and refer to this as $p_1$. We also set $\pi^{(1,2)} = \pi^{(1,3)} = \pi^{(2,3)}$, i.e. the prior probability that SNP i the causal one for two traits, to be identical and refer to this as $p_2$. We refer to the prior probability that SNP i the causal for all traits as $p_3$.
+% Chris Wallace: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4498151/
+% 1 × 10?4: This means that \approx 1 in 20 genes have a cis eQTL across the genome.
+% We consider the same threshold for the prior for disease association, we assume 
+% assumed a random SNP might be causal for either trait individually with prior probability 1 × 10?4. We adopted the same value here as it equates to a conservative expectation of ?20 causal SNPs on the ImmunoChip array for any disease 
+
+Then, the posterior probability supporting configuration $h$ among $H$ possible configurations, is:
+\begin{align}
+PP_h &= P(H_h | D)= \frac{P(H_h | D)}{\sum_{i=0}^H P(H_i)} = \frac{\frac{P(H_h | D)}{P(H_0|D)}}{1 + \sum_{i=1}^H \frac{P(H_i|D)}{P(H_0|D)}}
+\end{align}
+
+
+\section*{Model with i traits}
+
+\begin{equation}
+\frac{P(H_h|D)}{P(H_0|D)} = \prod_{i \in m} \pi^{(i)} \sum_{j=1}^Q BF_j^{(i)} - \frac{\prod_{i \in m} \pi^{(i)}}{\pi^{(1,2,...M)}} \sum_{j=1}^Q \pi^{(1,2,...M)} BF_j^{(1,2,...m)}
+\end{equation} 
+
+
+\section*{Correlation in the effect sizes}
+This is at page 5 of Pickrell's paper:
+
+\begin{equation}
+Cor(Z1,Z2) = E \left[ \frac{n_0}{n_1n_2} \rho_g + \frac{N}{\sqrt{N_1N_2}}\rho \right]
+\approx E \left[ \frac{N}{\sqrt{N_1N_2}}\rho \right]
+\end{equation} 
+
+
+\end{document}

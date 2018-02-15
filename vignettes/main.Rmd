@@ -1,0 +1,164 @@
+---
+title: "moloc: multiple co-localization"
+author: "Claudia Giambartolomei"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: bibliography.bib
+vignette: >
+  %\VignetteIndexEntry{moloc: multiple traits co-localization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Package Info
+
+The `moloc` package is an extension of `coloc` [see @Giambartolomei2014] 
+that can be used to perform genetic co-localization analysis of multiple phenotypes, to 
+understand whether they share common genetic causal variant(s) in a given region.  
+
+These examples will guide through how to run moloc using three traits on:
+
+* A single locus
+* Genome-wide/multiple loci analysis
+
+# Usage<a id="orgheadline2"></a>
+# `moloc` on single locus 
+## Input
+    * The summary statistics for each dataset must be in a list (e.g. list(gwas, eqtl, mqtl)).
+        Must have columns `SNP`, `BETA`, `SE`.
+        
+```{r three-tables-single, echo=FALSE, results='asis'}
+library(knitr)
+options(scipen = 1, digits = 2)
+## load single locus data (in a list) and bed file
+data_single=get(load(file="../data/data_single.rda"))
+t1 = knitr::kable(head(data_single[[1]], 5),  format='html', table.attr='cellpadding="1"', output = FALSE)
+t2 = knitr::kable(head(data_single[[2]], 5),  format='html', table.attr='cellpadding="1"', output = FALSE)
+t3 = knitr::kable(head(data_single[[3]], 5),  format='html', table.attr='cellpadding="1"', output = FALSE)
+cat(c('<table><tr valign="top"><td>', t1, '</td><td>', t2, '</td><td>', t3, '</td><tr></table>'),
+    sep = '')
+## 
+```
+
+## Analysis
+The main function is called `moloc_test` and outputs posterior probabilities for each 
+combination of datasets used in the input list. 
+The default is to average the Bayes Factors across three prior variances, 0.01, 0.1, 0.5, as
+suggested in Wakefield [see @Wakefield2009].
+
+The output is a list with three elements:
+
+1. First element is a data frame containing the priors, likelihoods and 
+Posteriors for each locus and each combination.
+We usually care about the last columns, the posterior probability of a shared variant for each model;
+
+1. Second element is the number of SNPs analyzed, 
+    in common across all datasets;
+    
+1. Third element of the output is a data frame with
+    the posterior probability of the most likely SNP.
+
+
+```{r message=FALSE, warning=F}
+options(scipen = 1, digits = 2)
+library(moloc)
+moloc <- moloc_test(data_single, prior_var=c(0.01, 0.1, 0.5), priors=c(1e-04, 1e-06, 1e-07))
+# Posteriors
+print(moloc[[1]])
+# Number of SNPs analyzed
+print(moloc[[2]])
+# Posterior of the most likely SNP co-localizing with another trait
+print(moloc[[3]])
+```
+
+# Usage<a id="orgheadline2"></a>
+# `moloc` Genome-wide/multiple loci analysis
+## Input
+    * The summary statistics for each dataset in a list (e.g. list(gwas, eqtl, mqtl)), same as for the single locus, but now have multiple ProbeIDs;
+        Must have columns `SNP`, `BETA`, `SE`; 
+        If the regions are defined based on ProbeID, these must match 
+        the ProbeID in the file.
+    * The bed file: specifies the region to use.
+      Must contain the columns `ProbeID`, `CHR`, `START`, `STOP` 
+      (other columns are ignored)
+
+```{r three-tables-genome, echo=FALSE, results='asis'}
+library(knitr)
+options(scipen = 1, digits = 2)
+## load single locus data (in a list) and bed file
+library(moloc)
+data_genome=get(load(file="../data/data_genome.rda"))
+t1 = knitr::kable(head(data_genome[[1]], 5),  format='html', table.attr='cellpadding="1"', output = FALSE)
+t2 = knitr::kable(head(data_genome[[2]], 5),  format='html', table.attr='cellpadding="1"', output = FALSE)
+t3 = knitr::kable(head(data_genome[[3]], 5),  format='html', table.attr='cellpadding="1"', output = FALSE)
+cat(c('<table><tr valign="top"><td>', t1, '</td><td>', t2, '</td><td>', t3, '</td><tr></table>'),
+    sep = '')
+## 
+```
+
+```{r echo=FALSE}
+knitr::kable(bed)
+## 
+```
+
+## Analysis
+The main function is called `coloc.eqtl.biom.mqtl` and outputs posterior probabilities for each region defined by the bed file.
+This function requires two packages: `foreach` and `doParallel`.
+
+The output is a list with two elements:
+
+1. First element is a data frame containing the priors, likelihoods and 
+Posteriors for each locus and each combination.
+
+1. Second element is the loci analyzed.
+    
+
+```{r message=FALSE, warning=F}
+options(scipen = 1, digits = 2)
+library(moloc)
+library(foreach)
+library(doParallel)
+moloc_genome <- coloc.genome(data_genome, bed, prefix = "pref", save.SNP.info=FALSE, cores=20, have_alleles=TRUE, bychrpos=TRUE, prior_var="default", priors=c(1e-04, 1e-06, 1e-07), min_nsnps = 50, takelog = FALSE, write=TRUE, outfolder = "test", forcePVAL = FALSE)
+# Posteriors
+print(moloc_genome[[1]])
+# Bed file of loci analyzed
+print(moloc_genome[[2]])
+```
+
+The columns are:
+
+* `ProbeID`: refers to the expression data;
+
+* `ProbeIDmet`: refers to the methylation data;
+
+* `CHR`, `START`, `STOP` refer to the region defined by the bed file;
+
+* `nsnps` is the number of SNPs analyzed per region;
+
+* `minpi` are the minimum p-values for each analyzed dataset in the region;
+
+* `minpi.snp` are the snps with the minimum p-values;
+
+* `bf.a` are the bayes factors supporting association with GWAS;
+
+* `bf.a,b` are the bayes factors supporting association 
+    of one variant with GWAS and a different variant for eQTL;
+    
+* `bf.ac,b` are the bayes factors supporting association 
+    of the same variant with GWAS and mQTL, and a different variant for eQTL;
+
+...
+
+* `PPA.a` are the corresponding posterior probabilities;
+
+...
+
+* `best.snp.a` is the SNP with the highest probability for GWAS;
+
+...
+
+* `best.snp.PPA.a` is the SNP posterior probability;
+
+...
+
+# References
