@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Claudia Giambartolomei" />
+
+<meta name="date" content="2020-02-13" />
+
+<title>moloc: multiple traits co-localization</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">moloc: multiple traits co-localization</h1>
+<h4 class="author"><em>Claudia Giambartolomei</em></h4>
+<h4 class="date"><em>2020-02-13</em></h4>
+
+
+
+<div id="package-info" class="section level2">
+<h2>Package Info</h2>
+<p>The <code>moloc</code> package is an extension of <code>coloc</code> <span class="citation">(see Giambartolomei et al. 2014)</span> that can be used to perform genetic co-localization analysis of multiple phenotypes, to understand whether they share common genetic causal variant(s) in a given region.</p>
+<p>These examples will guide through how to run moloc using three traits on:</p>
+<ul>
+<li>A single locus</li>
+<li>Genome-wide/multiple loci analysis</li>
+</ul>
+</div>
+<div id="usage" class="section level1">
+<h1>Usage<a id="orgheadline2"></a></h1>
+</div>
+<div id="moloc-on-single-locus" class="section level1">
+<h1><code>moloc</code> on single locus</h1>
+<p>The main function is called <code>moloc_test</code> and outputs posterior probabilities for each combination of datasets used in the input list. The default is to average the Bayes Factors across three prior variances, 0.01, 0.1, 0.5, as suggested in Wakefield <span class="citation">(see Wakefield 2009)</span>.</p>
+<div id="input" class="section level2">
+<h2>Input</h2>
+<pre><code>* The summary statistics for each dataset must be in a list (e.g. list(gwas, eqtl, mqtl)). 
+    Must have columns `SNP` or `CHR` and `POS`; `BETA`, `SE`; `N` and `MAF` (to estimate sdY); 
+    if a case control: `Ncases`.
+    If eqtl/mqtl: `ProbeID`.
+    If the regions are defined based on ProbeID, these must match 
+    the ProbeID in the file.
+    Optionally, &quot;A1&quot;, &quot;A2&quot; if want to match alleles</code></pre>
+<table>
+<tr valign="top">
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+rs1
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+1.13
+</td>
+<td style="text-align:right;">
+0.26
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs2
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+<td style="text-align:right;">
+0.89
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs3
+</td>
+<td style="text-align:right;">
+-0.02
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+-0.85
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs4
+</td>
+<td style="text-align:right;">
+-0.01
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+-0.38
+</td>
+<td style="text-align:right;">
+0.70
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs5
+</td>
+<td style="text-align:right;">
+-0.01
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+-0.53
+</td>
+<td style="text-align:right;">
+0.60
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+rs1
+</td>
+<td style="text-align:right;">
+-0.02
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+-0.24
+</td>
+<td style="text-align:right;">
+0.81
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs2
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.08
+</td>
+<td style="text-align:right;">
+1.23
+</td>
+<td style="text-align:right;">
+0.22
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.09
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs3
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.09
+</td>
+<td style="text-align:right;">
+-0.79
+</td>
+<td style="text-align:right;">
+0.43
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs4
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+-1.00
+</td>
+<td style="text-align:right;">
+0.32
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs5
+</td>
+<td style="text-align:right;">
+-0.06
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+-0.93
+</td>
+<td style="text-align:right;">
+0.35
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+rs1
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+-0.69
+</td>
+<td style="text-align:right;">
+0.49
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs2
+</td>
+<td style="text-align:right;">
+-0.03
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+<td style="text-align:right;">
+-0.23
+</td>
+<td style="text-align:right;">
+0.82
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs3
+</td>
+<td style="text-align:right;">
+-0.16
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+<td style="text-align:right;">
+-1.27
+</td>
+<td style="text-align:right;">
+0.20
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs4
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.62
+</td>
+<td style="text-align:right;">
+0.53
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs5
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+1.01
+</td>
+<td style="text-align:right;">
+0.31
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<tr>
+</table>
+</div>
+<div id="output" class="section level2">
+<h2>Output</h2>
+<p>The output is a list with three elements:</p>
+<ol style="list-style-type: decimal">
+<li><p>First element is a data frame containing the priors, likelihoods and Posteriors for each locus and each combination. We usually care about the last columns, the posterior probability of a shared variant for each model;</p></li>
+<li><p>Second element is the number of SNPs analyzed, in common across all datasets;</p></li>
+<li><p>Third element of the output is a data frame with the posterior probability of the most likely SNP.</p></li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">options</span>(<span class="dt">scipen =</span> <span class="dv">1</span>, <span class="dt">digits =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">library</span>(moloc)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">moloc &lt;-<span class="st"> </span><span class="kw">moloc_test</span>(data_single, <span class="dt">prior_var=</span><span class="kw">c</span>(<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>), <span class="dt">priors=</span><span class="kw">c</span>(<span class="fl">1e-04</span>, <span class="fl">1e-06</span>, <span class="fl">1e-07</span>))</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co"># Posteriors</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="kw">print</span>(moloc[[<span class="dv">1</span>]])</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="co">#&gt;       prior sumbf logBF_locus     PPA</span></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="co">#&gt; a     1e-04    43          36 1.6e-29</span></a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="co">#&gt; a,b   1e-08    93          80 1.1e-11</span></a>
+<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="co">#&gt; a,c   1e-08    61          48 2.0e-25</span></a>
+<a class="sourceLine" id="cb2-10" data-line-number="10"><span class="co">#&gt; a,bc  1e-10   114         101 2.1e-04</span></a>
+<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="co">#&gt; a,b,c 1e-12   114         101 2.1e-06</span></a>
+<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="co">#&gt; b     1e-04    52          46 2.4e-25</span></a>
+<a class="sourceLine" id="cb2-13" data-line-number="13"><span class="co">#&gt; b,c   1e-08    72          59 1.2e-20</span></a>
+<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="co">#&gt; ac,b  1e-10   115         101 3.1e-04</span></a>
+<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="co">#&gt; c     1e-04    21          14 4.7e-39</span></a>
+<a class="sourceLine" id="cb2-16" data-line-number="16"><span class="co">#&gt; ab,c  1e-10   115         101 3.2e-04</span></a>
+<a class="sourceLine" id="cb2-17" data-line-number="17"><span class="co">#&gt; ab    1e-06    95          88 6.9e-09</span></a>
+<a class="sourceLine" id="cb2-18" data-line-number="18"><span class="co">#&gt; ac    1e-06    63          57 1.4e-22</span></a>
+<a class="sourceLine" id="cb2-19" data-line-number="19"><span class="co">#&gt; bc    1e-06    73          67 3.5e-18</span></a>
+<a class="sourceLine" id="cb2-20" data-line-number="20"><span class="co">#&gt; abc   1e-07   116         109 1.0e+00</span></a>
+<a class="sourceLine" id="cb2-21" data-line-number="21"><span class="co">#&gt; zero  1e+00     0           0 4.8e-44</span></a>
+<a class="sourceLine" id="cb2-22" data-line-number="22"><span class="co"># Number of SNPs analyzed</span></a>
+<a class="sourceLine" id="cb2-23" data-line-number="23"><span class="kw">print</span>(moloc[[<span class="dv">2</span>]])</a>
+<a class="sourceLine" id="cb2-24" data-line-number="24"><span class="co">#&gt; [1] 831</span></a>
+<a class="sourceLine" id="cb2-25" data-line-number="25"><span class="co"># Posterior of the most likely SNP co-localizing with another trait</span></a>
+<a class="sourceLine" id="cb2-26" data-line-number="26"><span class="kw">print</span>(moloc[[<span class="dv">3</span>]])</a>
+<a class="sourceLine" id="cb2-27" data-line-number="27"><span class="co">#&gt;     coloc_ppas best.snp.coloc</span></a>
+<a class="sourceLine" id="cb2-28" data-line-number="28"><span class="co">#&gt; a            1          rs194</span></a>
+<a class="sourceLine" id="cb2-29" data-line-number="29"><span class="co">#&gt; b            1          rs194</span></a>
+<a class="sourceLine" id="cb2-30" data-line-number="30"><span class="co">#&gt; ab           1          rs194</span></a>
+<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="co">#&gt; c            1          rs194</span></a>
+<a class="sourceLine" id="cb2-32" data-line-number="32"><span class="co">#&gt; ac           1          rs194</span></a>
+<a class="sourceLine" id="cb2-33" data-line-number="33"><span class="co">#&gt; bc           1          rs194</span></a>
+<a class="sourceLine" id="cb2-34" data-line-number="34"><span class="co">#&gt; abc          1          rs194</span></a></code></pre></div>
+</div>
+</div>
+<div id="usage-1" class="section level1">
+<h1>Usage<a id="orgheadline2"></a></h1>
+</div>
+<div id="moloc-genome-widemultiple-loci-analysis" class="section level1">
+<h1><code>moloc</code> Genome-wide/multiple loci analysis</h1>
+<p>The main function for genome-wide analysis is called <code>coloc.genome</code> and runs moloc with all the combinations from your datasets, for example all the SNPs from a GWAS, genes, and methylation IDs. It outputs posterior probabilities for each region defined by the bed file. This function requires two packages: <code>foreach</code> and <code>doParallel</code>, and requires two files described below.</p>
+<div id="input-1" class="section level2">
+<h2>Input</h2>
+<pre><code>* The summary statistics for each dataset in a list (e.g. list(gwas, eqtl, mqtl)), same as for the single locus, but now have multiple ProbeIDs;
+    Must have columns `SNP` or `CHR` and `POS`; `BETA`, `SE`; `N` and `MAF` (to estimate sdY); 
+    if a case control: `Ncases`.
+    If eqtl/mqtl: `ProbeID`.
+    If the regions are defined based on ProbeID, these must match 
+    the ProbeID in the file.
+    Optionally, &quot;A1&quot;, &quot;A2&quot; if want to match alleles
+
+* The bed file: specifies the region to use.
+  Must contain the columns `ProbeID`, `CHR`, `START`, `STOP`  (START and STOP of region). 
+  (other columns are ignored)</code></pre>
+<table>
+<tr valign="top">
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+CHR
+</th>
+<th style="text-align:right;">
+POS
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:left;">
+A1
+</th>
+<th style="text-align:left;">
+A2
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+Ncases
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+15:91372381
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91372381
+</td>
+<td style="text-align:right;">
+-0.01
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.62
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:right;">
+0.68
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15:91430647
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91430647
+</td>
+<td style="text-align:right;">
+-0.02
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.11
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+0.74
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.26
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15:91457220
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91457220
+</td>
+<td style="text-align:right;">
+-0.03
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:right;">
+0.43
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15:91467670
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91467670
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+<td style="text-align:right;">
+0.87
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+0.97
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15:91368993
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91368993
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+0.85
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+ProbeID
+</th>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+CHR
+</th>
+<th style="text-align:right;">
+POS
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:left;">
+A1
+</th>
+<th style="text-align:left;">
+A2
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91426560
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91426560
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91418297
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91418297
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:right;">
+0.67
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91420940
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91420940
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:right;">
+0.70
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91418394
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91418394
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:right;">
+0.69
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.31
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91419432
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91419432
+</td>
+<td style="text-align:right;">
+-0.06
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+TC
+</td>
+<td style="text-align:right;">
+0.48
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.48
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+ProbeID
+</th>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:left;">
+CHR
+</th>
+<th style="text-align:right;">
+POS
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:left;">
+A1
+</th>
+<th style="text-align:left;">
+A2
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91427872
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91427872
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91425232
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91425232
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91428521
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91428521
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+CT
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91427612
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91427612
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91428955
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91428955
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<tr>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">ProbeID</th>
+<th align="left">Gene.name</th>
+<th align="left">ProbeID.1</th>
+<th align="left">CHR</th>
+<th align="right">START</th>
+<th align="right">STOP</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg04510874</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="even">
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg04510874</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447867</td>
+</tr>
+</tbody>
+</table>
+<pre><code>    # To create the bed file with combination of ProbeIDs you can use:
+    library(GenomicRanges)
+    DT &lt;- as.data.table(data_genome[[3]])
+    methyl_table &lt;- DT[, list(CHR= unique(CHR), START = min(POS), STOP = max(POS)), by = ProbeID]
+    bed1.gr &lt;- GRanges(seqnames = bed$CHR,IRanges(start = bed$START, end= bed$STOP))
+    bed2.gr &lt;- GRanges(seqnames = methyl_table$CHR,IRanges(start =methyl_table$START, end= methyl_table$STOP))
+    my.overlap &lt;- findOverlaps(query = bed2.gr, subject = bed1.gr)
+    bed = cbind(bed[my.overlap@subjectHits,], methyl_table[my.overlap@queryHits,])
+    bed = bed[,c(1,6,7,8,9,10)]
+    # Setting the prior_var to &quot;default&quot; uses coloc defaults</code></pre>
+</div>
+<div id="output-1" class="section level2">
+<h2>Output</h2>
+<p>The output is a list with two elements:</p>
+<ol style="list-style-type: decimal">
+<li><p>First element is a data frame containing the priors, likelihoods and Posteriors for each locus and each combination.</p></li>
+<li><p>Second element is the loci analyzed.</p></li>
+</ol>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">options</span>(<span class="dt">scipen =</span> <span class="dv">1</span>, <span class="dt">digits =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">library</span>(moloc)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw">library</span>(foreach)</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="kw">library</span>(doParallel)</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">res &lt;-<span class="st"> </span><span class="kw">coloc.genome</span>(data_genome, bed, <span class="dt">prefix =</span> <span class="st">&quot;pref&quot;</span>, <span class="dt">save.SNP.info=</span><span class="ot">FALSE</span>, <span class="dt">cores=</span><span class="dv">20</span>, <span class="dt">have_alleles=</span><span class="ot">TRUE</span>, <span class="dt">bychrpos=</span><span class="ot">TRUE</span>, <span class="dt">prior_var=</span><span class="st">&quot;default&quot;</span>, <span class="dt">priors=</span><span class="kw">c</span>(<span class="fl">1e-04</span>, <span class="fl">1e-06</span>, <span class="fl">1e-07</span>), <span class="dt">min_nsnps =</span> <span class="dv">50</span>, <span class="dt">takelog =</span> <span class="ot">FALSE</span>, <span class="dt">write=</span><span class="ot">TRUE</span>, <span class="dt">outfolder =</span> <span class="st">&quot;test&quot;</span>, <span class="dt">forcePVAL =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co"># Posteriors</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="kw">print</span>(res[[<span class="dv">1</span>]])</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="co">#&gt;   [1] ENSG00000140564_cg04510874 ENSG00000182511_cg04510874</span></a>
+<a class="sourceLine" id="cb5-9" data-line-number="9"><span class="co">#&gt;   [3] ENSG00000140564_cg12644059 ENSG00000140564_cg05211768</span></a>
+<a class="sourceLine" id="cb5-10" data-line-number="10"><span class="co">#&gt;   [5] ENSG00000182511_cg05211768 ENSG00000140564_cg02722434</span></a>
+<a class="sourceLine" id="cb5-11" data-line-number="11"><span class="co">#&gt;   [7] ENSG00000140564_cg09169633 ENSG00000182511_cg09169633</span></a>
+<a class="sourceLine" id="cb5-12" data-line-number="12"><span class="co">#&gt;   [9] ENSG00000140564_cg18247172 ENSG00000140564_cg19348484</span></a>
+<a class="sourceLine" id="cb5-13" data-line-number="13"><span class="co">#&gt;  [11] ENSG00000182511_cg19348484 ENSG00000140564_cg24888049</span></a>
+<a class="sourceLine" id="cb5-14" data-line-number="14"><span class="co">#&gt;  [13] ENSG00000182511_cg24888049 ENSG00000140564_cg11358405</span></a>
+<a class="sourceLine" id="cb5-15" data-line-number="15"><span class="co">#&gt;  [15] ENSG00000140564_cg13947995 ENSG00000182511_cg13947995</span></a>
+<a class="sourceLine" id="cb5-16" data-line-number="16"><span class="co">#&gt;  [17] ENSG00000140564_cg01321816 ENSG00000140564_cg13579205</span></a>
+<a class="sourceLine" id="cb5-17" data-line-number="17"><span class="co">#&gt;  [19] ENSG00000182511_cg13579205 ENSG00000140564_cg26899598</span></a>
+<a class="sourceLine" id="cb5-18" data-line-number="18"><span class="co">#&gt;  [21] ENSG00000182511_cg26899598 ENSG00000140564_cg06330618</span></a>
+<a class="sourceLine" id="cb5-19" data-line-number="19"><span class="co">#&gt;  [23] ENSG00000182511_cg06330618 ENSG00000140564_cg13410000</span></a>
+<a class="sourceLine" id="cb5-20" data-line-number="20"><span class="co">#&gt;  [25] ENSG00000140564_cg25647583 ENSG00000182511_cg25647583</span></a>
+<a class="sourceLine" id="cb5-21" data-line-number="21"><span class="co">#&gt;  [27] ENSG00000140564_cg05122887 ENSG00000182511_cg05122887</span></a>
+<a class="sourceLine" id="cb5-22" data-line-number="22"><span class="co">#&gt;  [29] ENSG00000140564_cg26405020 ENSG00000182511_cg26405020</span></a>
+<a class="sourceLine" id="cb5-23" data-line-number="23"><span class="co">#&gt;  [31] ENSG00000140564_cg03209642 ENSG00000182511_cg03209642</span></a>
+<a class="sourceLine" id="cb5-24" data-line-number="24"><span class="co">#&gt;  [33] ENSG00000140564_cg04612952 ENSG00000140564_cg22145651</span></a>
+<a class="sourceLine" id="cb5-25" data-line-number="25"><span class="co">#&gt;  [35] ENSG00000182511_cg22145651 ENSG00000140564_cg20992439</span></a>
+<a class="sourceLine" id="cb5-26" data-line-number="26"><span class="co">#&gt;  [37] ENSG00000182511_cg20992439 ENSG00000140564_cg01930518</span></a>
+<a class="sourceLine" id="cb5-27" data-line-number="27"><span class="co">#&gt;  [39] ENSG00000182511_cg01930518 ENSG00000140564_cg25242556</span></a>
+<a class="sourceLine" id="cb5-28" data-line-number="28"><span class="co">#&gt;  [41] ENSG00000182511_cg25242556 ENSG00000140564_cg20507228</span></a>
+<a class="sourceLine" id="cb5-29" data-line-number="29"><span class="co">#&gt;  [43] ENSG00000182511_cg20507228 ENSG00000140564_cg08724371</span></a>
+<a class="sourceLine" id="cb5-30" data-line-number="30"><span class="co">#&gt;  [45] ENSG00000182511_cg08724371 ENSG00000140564_cg07718650</span></a>
+<a class="sourceLine" id="cb5-31" data-line-number="31"><span class="co">#&gt;  [47] ENSG00000182511_cg07718650 ENSG00000140564_cg02864248</span></a>
+<a class="sourceLine" id="cb5-32" data-line-number="32"><span class="co">#&gt;  [49] ENSG00000182511_cg02864248 ENSG00000140564_cg26377677</span></a>
+<a class="sourceLine" id="cb5-33" data-line-number="33"><span class="co">#&gt;  [51] ENSG00000182511_cg26377677 ENSG00000140564_cg04853284</span></a>
+<a class="sourceLine" id="cb5-34" data-line-number="34"><span class="co">#&gt;  [53] ENSG00000182511_cg04853284 ENSG00000140564_cg24259688</span></a>
+<a class="sourceLine" id="cb5-35" data-line-number="35"><span class="co">#&gt;  [55] ENSG00000182511_cg24259688 ENSG00000140564_cg17017272</span></a>
+<a class="sourceLine" id="cb5-36" data-line-number="36"><span class="co">#&gt;  [57] ENSG00000182511_cg17017272 ENSG00000140564_cg16976547</span></a>
+<a class="sourceLine" id="cb5-37" data-line-number="37"><span class="co">#&gt;  [59] ENSG00000182511_cg16976547 ENSG00000140564_cg19114277</span></a>
+<a class="sourceLine" id="cb5-38" data-line-number="38"><span class="co">#&gt;  [61] ENSG00000182511_cg19114277 ENSG00000140564_cg17396638</span></a>
+<a class="sourceLine" id="cb5-39" data-line-number="39"><span class="co">#&gt;  [63] ENSG00000182511_cg17396638 ENSG00000140564_cg16895464</span></a>
+<a class="sourceLine" id="cb5-40" data-line-number="40"><span class="co">#&gt;  [65] ENSG00000182511_cg16895464 ENSG00000140564_cg14538437</span></a>
+<a class="sourceLine" id="cb5-41" data-line-number="41"><span class="co">#&gt;  [67] ENSG00000140564_cg00630237 ENSG00000182511_cg00630237</span></a>
+<a class="sourceLine" id="cb5-42" data-line-number="42"><span class="co">#&gt;  [69] ENSG00000140564_cg22196191 ENSG00000182511_cg22196191</span></a>
+<a class="sourceLine" id="cb5-43" data-line-number="43"><span class="co">#&gt;  [71] ENSG00000140564_cg09397246 ENSG00000182511_cg09397246</span></a>
+<a class="sourceLine" id="cb5-44" data-line-number="44"><span class="co">#&gt;  [73] ENSG00000140564_cg13798842 ENSG00000182511_cg13798842</span></a>
+<a class="sourceLine" id="cb5-45" data-line-number="45"><span class="co">#&gt;  [75] ENSG00000140564_cg00758797 ENSG00000182511_cg00758797</span></a>
+<a class="sourceLine" id="cb5-46" data-line-number="46"><span class="co">#&gt;  [77] ENSG00000140564_cg05719672 ENSG00000182511_cg05719672</span></a>
+<a class="sourceLine" id="cb5-47" data-line-number="47"><span class="co">#&gt;  [79] ENSG00000140564_cg00207731 ENSG00000182511_cg00207731</span></a>
+<a class="sourceLine" id="cb5-48" data-line-number="48"><span class="co">#&gt;  [81] ENSG00000140564_cg05131526 ENSG00000182511_cg05131526</span></a>
+<a class="sourceLine" id="cb5-49" data-line-number="49"><span class="co">#&gt;  [83] ENSG00000140564_cg03403298 ENSG00000182511_cg03403298</span></a>
+<a class="sourceLine" id="cb5-50" data-line-number="50"><span class="co">#&gt;  [85] ENSG00000140564_cg05469396 ENSG00000182511_cg05469396</span></a>
+<a class="sourceLine" id="cb5-51" data-line-number="51"><span class="co">#&gt;  [87] ENSG00000140564_cg21472639 ENSG00000182511_cg21472639</span></a>
+<a class="sourceLine" id="cb5-52" data-line-number="52"><span class="co">#&gt;  [89] ENSG00000140564_cg25606844 ENSG00000140564_cg11582017</span></a>
+<a class="sourceLine" id="cb5-53" data-line-number="53"><span class="co">#&gt;  [91] ENSG00000182511_cg11582017 ENSG00000140564_cg05180856</span></a>
+<a class="sourceLine" id="cb5-54" data-line-number="54"><span class="co">#&gt;  [93] ENSG00000182511_cg05180856 ENSG00000140564_cg12984356</span></a>
+<a class="sourceLine" id="cb5-55" data-line-number="55"><span class="co">#&gt;  [95] ENSG00000182511_cg12984356 ENSG00000140564_cg18661868</span></a>
+<a class="sourceLine" id="cb5-56" data-line-number="56"><span class="co">#&gt;  [97] ENSG00000182511_cg18661868 ENSG00000140564_cg20622470</span></a>
+<a class="sourceLine" id="cb5-57" data-line-number="57"><span class="co">#&gt;  [99] ENSG00000182511_cg20622470 ENSG00000140564_cg12015851</span></a>
+<a class="sourceLine" id="cb5-58" data-line-number="58"><span class="co">#&gt; [101] ENSG00000182511_cg12015851 ENSG00000140564_cg25639557</span></a>
+<a class="sourceLine" id="cb5-59" data-line-number="59"><span class="co">#&gt; [103] ENSG00000182511_cg25639557 ENSG00000140564_cg08740748</span></a>
+<a class="sourceLine" id="cb5-60" data-line-number="60"><span class="co">#&gt; [105] ENSG00000182511_cg08740748 ENSG00000140564_cg14231966</span></a>
+<a class="sourceLine" id="cb5-61" data-line-number="61"><span class="co">#&gt; [107] ENSG00000182511_cg14231966 ENSG00000140564_cg07281959</span></a>
+<a class="sourceLine" id="cb5-62" data-line-number="62"><span class="co">#&gt; [109] ENSG00000182511_cg07281959 ENSG00000140564_cg01482407</span></a>
+<a class="sourceLine" id="cb5-63" data-line-number="63"><span class="co">#&gt; [111] ENSG00000182511_cg01482407 ENSG00000140564_cg23121096</span></a>
+<a class="sourceLine" id="cb5-64" data-line-number="64"><span class="co">#&gt; [113] ENSG00000182511_cg23121096 ENSG00000140564_cg23071286</span></a>
+<a class="sourceLine" id="cb5-65" data-line-number="65"><span class="co">#&gt; [115] ENSG00000140564_cg12075901 ENSG00000182511_cg12075901</span></a>
+<a class="sourceLine" id="cb5-66" data-line-number="66"><span class="co">#&gt; [117] ENSG00000140564_cg22364906 ENSG00000140564_cg18704421</span></a>
+<a class="sourceLine" id="cb5-67" data-line-number="67"><span class="co">#&gt; [119] ENSG00000182511_cg18704421 ENSG00000182511_cg02374944</span></a>
+<a class="sourceLine" id="cb5-68" data-line-number="68"><span class="co">#&gt; 120 Levels: ENSG00000140564_cg04510874 ... ENSG00000182511_cg02374944</span></a>
+<a class="sourceLine" id="cb5-69" data-line-number="69"><span class="co"># Bed file of loci analyzed</span></a>
+<a class="sourceLine" id="cb5-70" data-line-number="70"><span class="kw">print</span>(res[[<span class="dv">2</span>]])</a>
+<a class="sourceLine" id="cb5-71" data-line-number="71"><span class="co">#&gt;   [1] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15</span></a>
+<a class="sourceLine" id="cb5-72" data-line-number="72"><span class="co">#&gt;  [24] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15</span></a>
+<a class="sourceLine" id="cb5-73" data-line-number="73"><span class="co">#&gt;  [47] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15</span></a>
+<a class="sourceLine" id="cb5-74" data-line-number="74"><span class="co">#&gt;  [70] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15</span></a>
+<a class="sourceLine" id="cb5-75" data-line-number="75"><span class="co">#&gt;  [93] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15</span></a>
+<a class="sourceLine" id="cb5-76" data-line-number="76"><span class="co">#&gt; [116] 15 15 15 15 15</span></a></code></pre></div>
+<p>The columns are:</p>
+<ul>
+<li><p><code>ProbeID</code>: refers to the expression data;</p></li>
+<li><p><code>ProbeIDmet</code>: refers to the methylation data;</p></li>
+<li><p><code>CHR</code>, <code>START</code>, <code>STOP</code> refer to the region defined by the bed file;</p></li>
+<li><p><code>nsnps</code> is the number of SNPs analyzed per region;</p></li>
+<li><p><code>minpi</code> are the minimum p-values for each analyzed dataset in the region;</p></li>
+<li><p><code>minpi.snp</code> are the snps with the minimum p-values;</p></li>
+<li><p><code>bf.a</code> are the bayes factors supporting association with GWAS;</p></li>
+<li><p><code>bf.a,b</code> are the bayes factors supporting association of one variant with GWAS and a different variant for eQTL;</p></li>
+<li><p><code>bf.ac,b</code> are the bayes factors supporting association of the same variant with GWAS and mQTL, and a different variant for eQTL;</p></li>
+</ul>
+<p>…</p>
+<ul>
+<li><code>PPA.a</code> are the corresponding posterior probabilities;</li>
+</ul>
+<p>…</p>
+<ul>
+<li><code>best.snp.a</code> is the SNP with the highest probability for GWAS;</li>
+</ul>
+<p>…</p>
+<ul>
+<li><code>best.snp.PPA.a</code> is the SNP posterior probability;</li>
+</ul>
+<p>…</p>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>[1] Giambartolomei et al., 2014, PLoS Genet 10(5): e1004383. <a href="https://doi.org/10.1371/journal.pgen.1004383" class="uri">https://doi.org/10.1371/journal.pgen.1004383</a></p>
+<p>[2] Wakefield J, 2009, Genetic Epidemiology 33: 79–86.</p>
+<div id="refs" class="references">
+<div id="ref-Giambartolomei2014">
+<p>Giambartolomei, Claudia, Damjan Vukcevic, Eric E. Schadt, Lude Franke, Aroon D. Hingorani, Chris Wallace, and Vincent Plagnol. 2014. “Bayesian Test for Colocalisation Between Pairs of Genetic Association Studies Using Summary Statistics.” <em>PLoS Genet</em> 10 (5): e1004383. <a href="https://doi.org/10.1371/journal.pgen.1004383">https://doi.org/10.1371/journal.pgen.1004383</a>.</p>
+</div>
+<div id="ref-Wakefield2009">
+<p>Wakefield, Jon. 2009. “Bayes Factors for Genome-Wide Association Studies: Comparison with P-Values.” <em>Genetic Epidemiology</em> 33 (1): 79–86. <a href="http://onlinelibrary.wiley.com/doi/10.1002/gepi.20359/full">http://onlinelibrary.wiley.com/doi/10.1002/gepi.20359/full</a>.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

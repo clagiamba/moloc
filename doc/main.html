@@ -1,0 +1,3735 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Claudia Giambartolomei" />
+
+<meta name="date" content="2020-02-13" />
+
+<title>moloc: multiple co-localization</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">moloc: multiple co-localization</h1>
+<h4 class="author"><em>Claudia Giambartolomei</em></h4>
+<h4 class="date"><em>2020-02-13</em></h4>
+
+
+
+<div id="package-info" class="section level2">
+<h2>Package Info</h2>
+<p>The <code>moloc</code> package is an extension of <code>coloc</code> <span class="citation">(see Giambartolomei et al. 2014)</span> that can be used to perform genetic co-localization analysis of multiple phenotypes, to understand whether they share common genetic causal variant(s) in a given region.</p>
+<p>These examples will guide through how to run moloc using three traits on:</p>
+<ul>
+<li>A single locus</li>
+<li>Genome-wide/multiple loci analysis</li>
+</ul>
+</div>
+<div id="usage" class="section level1">
+<h1>Usage<a id="orgheadline2"></a></h1>
+</div>
+<div id="moloc-on-single-locus" class="section level1">
+<h1><code>moloc</code> on single locus</h1>
+<p>The main function is called <code>moloc_test</code> and outputs posterior probabilities for each combination of datasets used in the input list. The default is to average the Bayes Factors across three prior variances, 0.01, 0.1, 0.5, as suggested in Wakefield <span class="citation">(see Wakefield 2009)</span>.</p>
+<div id="input" class="section level2">
+<h2>Input</h2>
+<pre><code>* The summary statistics for each dataset must be in a list (e.g. list(gwas, eqtl, mqtl)).
+    Must have columns `SNP`, `BETA`, `SE`.
+    </code></pre>
+<table>
+<tr valign="top">
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+rs1
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+1.13
+</td>
+<td style="text-align:right;">
+0.26
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs2
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+<td style="text-align:right;">
+0.89
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs3
+</td>
+<td style="text-align:right;">
+-0.02
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+-0.85
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs4
+</td>
+<td style="text-align:right;">
+-0.01
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+-0.38
+</td>
+<td style="text-align:right;">
+0.70
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs5
+</td>
+<td style="text-align:right;">
+-0.01
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+-0.53
+</td>
+<td style="text-align:right;">
+0.60
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+rs1
+</td>
+<td style="text-align:right;">
+-0.02
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+-0.24
+</td>
+<td style="text-align:right;">
+0.81
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs2
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.08
+</td>
+<td style="text-align:right;">
+1.23
+</td>
+<td style="text-align:right;">
+0.22
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.09
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs3
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.09
+</td>
+<td style="text-align:right;">
+-0.79
+</td>
+<td style="text-align:right;">
+0.43
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs4
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+-1.00
+</td>
+<td style="text-align:right;">
+0.32
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs5
+</td>
+<td style="text-align:right;">
+-0.06
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+-0.93
+</td>
+<td style="text-align:right;">
+0.35
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+rs1
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+-0.69
+</td>
+<td style="text-align:right;">
+0.49
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs2
+</td>
+<td style="text-align:right;">
+-0.03
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+<td style="text-align:right;">
+-0.23
+</td>
+<td style="text-align:right;">
+0.82
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs3
+</td>
+<td style="text-align:right;">
+-0.16
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+<td style="text-align:right;">
+-1.27
+</td>
+<td style="text-align:right;">
+0.20
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs4
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.62
+</td>
+<td style="text-align:right;">
+0.53
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rs5
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+1.01
+</td>
+<td style="text-align:right;">
+0.31
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<tr>
+</table>
+</div>
+<div id="output" class="section level2">
+<h2>Output</h2>
+<p>The output is a list with three elements:</p>
+<ol style="list-style-type: decimal">
+<li><p>First element is a data frame containing the priors, likelihoods and Posteriors for each locus and each combination. We usually care about the last columns, the posterior probability of a shared variant for each model;</p></li>
+<li><p>Second element is the number of SNPs analyzed, in common across all datasets;</p></li>
+<li><p>Third element of the output is a data frame with the posterior probability of the most likely SNP.</p></li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">options</span>(<span class="dt">scipen =</span> <span class="dv">1</span>, <span class="dt">digits =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">library</span>(moloc)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">moloc &lt;-<span class="st"> </span><span class="kw">moloc_test</span>(data_single, <span class="dt">prior_var=</span><span class="kw">c</span>(<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>), <span class="dt">priors=</span><span class="kw">c</span>(<span class="fl">1e-04</span>, <span class="fl">1e-06</span>, <span class="fl">1e-07</span>))</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co"># Posteriors</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="kw">print</span>(moloc[[<span class="dv">1</span>]])</a></code></pre></div>
+<pre><code>##       prior sumbf logBF_locus     PPA
+## a     1e-04    43          36 1.6e-29
+## a,b   1e-08    93          80 1.1e-11
+## a,c   1e-08    61          48 2.0e-25
+## a,bc  1e-10   114         101 2.1e-04
+## a,b,c 1e-12   114         101 2.1e-06
+## b     1e-04    52          46 2.4e-25
+## b,c   1e-08    72          59 1.2e-20
+## ac,b  1e-10   115         101 3.1e-04
+## c     1e-04    21          14 4.7e-39
+## ab,c  1e-10   115         101 3.2e-04
+## ab    1e-06    95          88 6.9e-09
+## ac    1e-06    63          57 1.4e-22
+## bc    1e-06    73          67 3.5e-18
+## abc   1e-07   116         109 1.0e+00
+## zero  1e+00     0           0 4.8e-44</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># Number of SNPs analyzed</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">print</span>(moloc[[<span class="dv">2</span>]])</a></code></pre></div>
+<pre><code>## [1] 831</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># Posterior of the most likely SNP co-localizing with another trait</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">print</span>(moloc[[<span class="dv">3</span>]])</a></code></pre></div>
+<pre><code>##     coloc_ppas best.snp.coloc
+## a            1          rs194
+## b            1          rs194
+## ab           1          rs194
+## c            1          rs194
+## ac           1          rs194
+## bc           1          rs194
+## abc          1          rs194</code></pre>
+</div>
+</div>
+<div id="usage-1" class="section level1">
+<h1>Usage<a id="orgheadline2"></a></h1>
+</div>
+<div id="moloc-genome-widemultiple-loci-analysis" class="section level1">
+<h1><code>moloc</code> Genome-wide/multiple loci analysis</h1>
+<p>The main function is called <code>coloc.genome</code> and outputs posterior probabilities for each region defined by the bed file. This function requires two packages: <code>foreach</code> and <code>doParallel</code>, and requires two files described below.</p>
+<div id="input-1" class="section level2">
+<h2>Input</h2>
+<pre><code>* The summary statistics for each dataset in a list (e.g. list(gwas, eqtl, mqtl)), same as for the single locus, but now have multiple ProbeIDs;
+    Must have columns `SNP` or `CHR` and `POS`, `BETA`, `SE`, `N` and `MAF` (to estimate sdY); 
+    if a case control: `Ncases`.
+    If eqtl/mqtl: `ProbeID`.
+    If the regions are defined based on ProbeID, these must match 
+    the ProbeID in the file.
+    Optionally, &quot;A1&quot;, &quot;A2&quot; if want to match alleles
+
+* The bed file: specifies the region to use.
+  Must contain the columns `ProbeID`, `CHR`, `START`, `STOP`  (START and STOP of region). 
+  (other columns are ignored)</code></pre>
+<table>
+<tr valign="top">
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+CHR
+</th>
+<th style="text-align:right;">
+POS
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:left;">
+A1
+</th>
+<th style="text-align:left;">
+A2
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+Ncases
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+15:91372381
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91372381
+</td>
+<td style="text-align:right;">
+-0.01
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.62
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:right;">
+0.68
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15:91430647
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91430647
+</td>
+<td style="text-align:right;">
+-0.02
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.11
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+0.74
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.26
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15:91457220
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91457220
+</td>
+<td style="text-align:right;">
+-0.03
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:right;">
+0.43
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15:91467670
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91467670
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+<td style="text-align:right;">
+0.87
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+0.97
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15:91368993
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91368993
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+0.85
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+<td style="text-align:right;">
+82315
+</td>
+<td style="text-align:right;">
+35476
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+ProbeID
+</th>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:right;">
+CHR
+</th>
+<th style="text-align:right;">
+POS
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:left;">
+A1
+</th>
+<th style="text-align:left;">
+A2
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91426560
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91426560
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91418297
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91418297
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:right;">
+0.67
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91420940
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91420940
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:right;">
+0.70
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91418394
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91418394
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:right;">
+0.69
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.31
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENSG00000140564
+</td>
+<td style="text-align:left;">
+15:91419432
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+91419432
+</td>
+<td style="text-align:right;">
+-0.06
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+TC
+</td>
+<td style="text-align:right;">
+0.48
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+0.48
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table cellpadding="1">
+<thead>
+<tr>
+<th style="text-align:left;">
+ProbeID
+</th>
+<th style="text-align:left;">
+SNP
+</th>
+<th style="text-align:left;">
+CHR
+</th>
+<th style="text-align:right;">
+POS
+</th>
+<th style="text-align:right;">
+BETA
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+PVAL
+</th>
+<th style="text-align:left;">
+A1
+</th>
+<th style="text-align:left;">
+A2
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+MAF
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91427872
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91427872
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91425232
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91425232
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91428521
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91428521
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+CT
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91427612
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91427612
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+G
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cg04510874
+</td>
+<td style="text-align:left;">
+15:91428955
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+91428955
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+T
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<tr>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">ProbeID</th>
+<th align="left">Gene.name</th>
+<th align="left">ProbeID.1</th>
+<th align="left">CHR</th>
+<th align="right">START</th>
+<th align="right">STOP</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg04510874</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg04510874</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="odd">
+<td>1.1</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg12644059</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91376978</td>
+</tr>
+<tr class="even">
+<td>1.2</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05211768</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447766</td>
+</tr>
+<tr class="odd">
+<td>2.1</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05211768</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447766</td>
+</tr>
+<tr class="even">
+<td>1.3</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg02722434</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91376978</td>
+</tr>
+<tr class="odd">
+<td>1.4</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg09169633</td>
+<td align="left">15</td>
+<td align="right">91427872</td>
+<td align="right">91467516</td>
+</tr>
+<tr class="even">
+<td>2.2</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg09169633</td>
+<td align="left">15</td>
+<td align="right">91427872</td>
+<td align="right">91467516</td>
+</tr>
+<tr class="odd">
+<td>1.5</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg18247172</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91386009</td>
+</tr>
+<tr class="even">
+<td>1.6</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg19348484</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91431856</td>
+</tr>
+<tr class="odd">
+<td>2.3</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg19348484</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91431856</td>
+</tr>
+<tr class="even">
+<td>1.7</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg24888049</td>
+<td align="left">15</td>
+<td align="right">91406986</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="odd">
+<td>2.4</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg24888049</td>
+<td align="left">15</td>
+<td align="right">91406986</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="even">
+<td>1.8</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg11358405</td>
+<td align="left">15</td>
+<td align="right">91363303</td>
+<td align="right">91402803</td>
+</tr>
+<tr class="odd">
+<td>2.5</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg11358405</td>
+<td align="left">15</td>
+<td align="right">91363303</td>
+<td align="right">91402803</td>
+</tr>
+<tr class="even">
+<td>1.9</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg13947995</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447766</td>
+</tr>
+<tr class="odd">
+<td>2.6</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13947995</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447766</td>
+</tr>
+<tr class="even">
+<td>1.10</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg01321816</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91376978</td>
+</tr>
+<tr class="odd">
+<td>1.11</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg13579205</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91467516</td>
+</tr>
+<tr class="even">
+<td>2.7</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13579205</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91467516</td>
+</tr>
+<tr class="odd">
+<td>1.12</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg08022502</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.8</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08022502</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.13</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg26899598</td>
+<td align="left">15</td>
+<td align="right">91409409</td>
+<td align="right">91449015</td>
+</tr>
+<tr class="even">
+<td>2.9</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg26899598</td>
+<td align="left">15</td>
+<td align="right">91409409</td>
+<td align="right">91449015</td>
+</tr>
+<tr class="odd">
+<td>1.14</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg06330618</td>
+<td align="left">15</td>
+<td align="right">91409409</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="even">
+<td>2.10</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg06330618</td>
+<td align="left">15</td>
+<td align="right">91409409</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="odd">
+<td>1.15</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg13410000</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91376978</td>
+</tr>
+<tr class="even">
+<td>1.16</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg25647583</td>
+<td align="left">15</td>
+<td align="right">91407197</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="odd">
+<td>2.11</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg25647583</td>
+<td align="left">15</td>
+<td align="right">91407197</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="even">
+<td>1.17</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg25884324</td>
+<td align="left">15</td>
+<td align="right">91463352</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.12</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg25884324</td>
+<td align="left">15</td>
+<td align="right">91463352</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.18</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg16414568</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.13</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg16414568</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.19</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05878630</td>
+<td align="left">15</td>
+<td align="right">91455321</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.14</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05878630</td>
+<td align="left">15</td>
+<td align="right">91455321</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.20</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg03291024</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.15</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg03291024</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.21</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg01351822</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.16</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg01351822</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.22</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05122887</td>
+<td align="left">15</td>
+<td align="right">91405684</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="odd">
+<td>2.17</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05122887</td>
+<td align="left">15</td>
+<td align="right">91405684</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="even">
+<td>1.23</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg26405020</td>
+<td align="left">15</td>
+<td align="right">91407740</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="odd">
+<td>2.18</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg26405020</td>
+<td align="left">15</td>
+<td align="right">91407740</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="even">
+<td>1.24</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg03209642</td>
+<td align="left">15</td>
+<td align="right">91407740</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="odd">
+<td>2.19</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg03209642</td>
+<td align="left">15</td>
+<td align="right">91407740</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="even">
+<td>1.25</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg04612952</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91383142</td>
+</tr>
+<tr class="odd">
+<td>1.26</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg13778201</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.20</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13778201</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.27</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg22145651</td>
+<td align="left">15</td>
+<td align="right">91400208</td>
+<td align="right">91439417</td>
+</tr>
+<tr class="even">
+<td>2.21</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg22145651</td>
+<td align="left">15</td>
+<td align="right">91400208</td>
+<td align="right">91439417</td>
+</tr>
+<tr class="odd">
+<td>1.28</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg20992439</td>
+<td align="left">15</td>
+<td align="right">91410009</td>
+<td align="right">91449015</td>
+</tr>
+<tr class="even">
+<td>2.22</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg20992439</td>
+<td align="left">15</td>
+<td align="right">91410009</td>
+<td align="right">91449015</td>
+</tr>
+<tr class="odd">
+<td>1.29</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg08267442</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.23</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08267442</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.30</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg01930518</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91433951</td>
+</tr>
+<tr class="even">
+<td>2.24</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg01930518</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91433951</td>
+</tr>
+<tr class="odd">
+<td>1.31</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg25242556</td>
+<td align="left">15</td>
+<td align="right">91403646</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="even">
+<td>2.25</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg25242556</td>
+<td align="left">15</td>
+<td align="right">91403646</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="odd">
+<td>1.32</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg20507228</td>
+<td align="left">15</td>
+<td align="right">91440302</td>
+<td align="right">91480010</td>
+</tr>
+<tr class="even">
+<td>2.26</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg20507228</td>
+<td align="left">15</td>
+<td align="right">91440302</td>
+<td align="right">91480010</td>
+</tr>
+<tr class="odd">
+<td>1.33</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg00526711</td>
+<td align="left">15</td>
+<td align="right">91458485</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.27</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg00526711</td>
+<td align="left">15</td>
+<td align="right">91458485</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.34</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg21792018</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91430647</td>
+</tr>
+<tr class="even">
+<td>2.28</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg21792018</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91430647</td>
+</tr>
+<tr class="odd">
+<td>1.35</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg08724371</td>
+<td align="left">15</td>
+<td align="right">91422543</td>
+<td align="right">91460629</td>
+</tr>
+<tr class="even">
+<td>2.29</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08724371</td>
+<td align="left">15</td>
+<td align="right">91422543</td>
+<td align="right">91460629</td>
+</tr>
+<tr class="odd">
+<td>1.36</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg13615036</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.30</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13615036</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.37</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg07718650</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91454110</td>
+</tr>
+<tr class="even">
+<td>2.31</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg07718650</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91454110</td>
+</tr>
+<tr class="odd">
+<td>1.38</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg02864248</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91431807</td>
+</tr>
+<tr class="even">
+<td>2.32</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg02864248</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91431807</td>
+</tr>
+<tr class="odd">
+<td>1.39</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg26377677</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91431856</td>
+</tr>
+<tr class="even">
+<td>2.33</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg26377677</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91431856</td>
+</tr>
+<tr class="odd">
+<td>1.40</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg04853284</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91455618</td>
+</tr>
+<tr class="even">
+<td>2.34</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg04853284</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91455618</td>
+</tr>
+<tr class="odd">
+<td>1.41</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg11852674</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.35</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg11852674</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.42</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg27366007</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.36</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg27366007</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.43</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg24259688</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91433951</td>
+</tr>
+<tr class="even">
+<td>2.37</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg24259688</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91433951</td>
+</tr>
+<tr class="odd">
+<td>1.44</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg17017272</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="even">
+<td>2.38</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg17017272</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="odd">
+<td>1.45</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg16976547</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91453131</td>
+</tr>
+<tr class="even">
+<td>2.39</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg16976547</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91453131</td>
+</tr>
+<tr class="odd">
+<td>1.46</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg27064981</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.40</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg27064981</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.47</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg26170245</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.41</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg26170245</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.48</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg19114277</td>
+<td align="left">15</td>
+<td align="right">91426560</td>
+<td align="right">91465224</td>
+</tr>
+<tr class="even">
+<td>2.42</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg19114277</td>
+<td align="left">15</td>
+<td align="right">91426560</td>
+<td align="right">91465224</td>
+</tr>
+<tr class="odd">
+<td>1.49</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg17396638</td>
+<td align="left">15</td>
+<td align="right">91403646</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="even">
+<td>2.43</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg17396638</td>
+<td align="left">15</td>
+<td align="right">91403646</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="odd">
+<td>1.50</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg16895464</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91433951</td>
+</tr>
+<tr class="even">
+<td>2.44</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg16895464</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91433951</td>
+</tr>
+<tr class="odd">
+<td>1.51</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg24751836</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.45</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg24751836</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.52</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg11183227</td>
+<td align="left">15</td>
+<td align="right">91435422</td>
+<td align="right">91474738</td>
+</tr>
+<tr class="even">
+<td>2.46</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg11183227</td>
+<td align="left">15</td>
+<td align="right">91435422</td>
+<td align="right">91474738</td>
+</tr>
+<tr class="odd">
+<td>1.53</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg14538437</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91386009</td>
+</tr>
+<tr class="even">
+<td>1.54</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg00630237</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91453131</td>
+</tr>
+<tr class="odd">
+<td>2.47</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg00630237</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91453131</td>
+</tr>
+<tr class="even">
+<td>1.55</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg22196191</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91456102</td>
+</tr>
+<tr class="odd">
+<td>2.48</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg22196191</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91456102</td>
+</tr>
+<tr class="even">
+<td>1.56</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg09397246</td>
+<td align="left">15</td>
+<td align="right">91407740</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="odd">
+<td>2.49</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg09397246</td>
+<td align="left">15</td>
+<td align="right">91407740</td>
+<td align="right">91446472</td>
+</tr>
+<tr class="even">
+<td>1.57</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg19670290</td>
+<td align="left">15</td>
+<td align="right">91457810</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.50</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg19670290</td>
+<td align="left">15</td>
+<td align="right">91457810</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.58</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg12309172</td>
+<td align="left">15</td>
+<td align="right">91435172</td>
+<td align="right">91474236</td>
+</tr>
+<tr class="odd">
+<td>2.51</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg12309172</td>
+<td align="left">15</td>
+<td align="right">91435172</td>
+<td align="right">91474236</td>
+</tr>
+<tr class="even">
+<td>1.59</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg13798842</td>
+<td align="left">15</td>
+<td align="right">91430907</td>
+<td align="right">91469846</td>
+</tr>
+<tr class="odd">
+<td>2.52</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13798842</td>
+<td align="left">15</td>
+<td align="right">91430907</td>
+<td align="right">91469846</td>
+</tr>
+<tr class="even">
+<td>1.60</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg00758797</td>
+<td align="left">15</td>
+<td align="right">91404705</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="odd">
+<td>2.53</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg00758797</td>
+<td align="left">15</td>
+<td align="right">91404705</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="even">
+<td>1.61</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05719672</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="odd">
+<td>2.54</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05719672</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="even">
+<td>1.62</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg08551047</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.55</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08551047</td>
+<td align="left">15</td>
+<td align="right">91454110</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.63</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg00207731</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91435516</td>
+</tr>
+<tr class="odd">
+<td>2.56</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg00207731</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91435516</td>
+</tr>
+<tr class="even">
+<td>1.64</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05131526</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="odd">
+<td>2.57</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05131526</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="even">
+<td>1.65</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg03403298</td>
+<td align="left">15</td>
+<td align="right">91426560</td>
+<td align="right">91465224</td>
+</tr>
+<tr class="odd">
+<td>2.58</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg03403298</td>
+<td align="left">15</td>
+<td align="right">91426560</td>
+<td align="right">91465224</td>
+</tr>
+<tr class="even">
+<td>1.66</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg00655702</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.59</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg00655702</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.67</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05469396</td>
+<td align="left">15</td>
+<td align="right">91400208</td>
+<td align="right">91439417</td>
+</tr>
+<tr class="odd">
+<td>2.60</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05469396</td>
+<td align="left">15</td>
+<td align="right">91400208</td>
+<td align="right">91439417</td>
+</tr>
+<tr class="even">
+<td>1.68</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg18724928</td>
+<td align="left">15</td>
+<td align="right">91453131</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.61</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg18724928</td>
+<td align="left">15</td>
+<td align="right">91453131</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.69</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg21472639</td>
+<td align="left">15</td>
+<td align="right">91400208</td>
+<td align="right">91439417</td>
+</tr>
+<tr class="odd">
+<td>2.62</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg21472639</td>
+<td align="left">15</td>
+<td align="right">91400208</td>
+<td align="right">91439417</td>
+</tr>
+<tr class="even">
+<td>1.70</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg25606844</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91383142</td>
+</tr>
+<tr class="odd">
+<td>1.71</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg07529087</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91429979</td>
+</tr>
+<tr class="even">
+<td>2.63</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg07529087</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91429979</td>
+</tr>
+<tr class="odd">
+<td>1.72</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg11582017</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91433951</td>
+</tr>
+<tr class="even">
+<td>2.64</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg11582017</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91433951</td>
+</tr>
+<tr class="odd">
+<td>1.73</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05180856</td>
+<td align="left">15</td>
+<td align="right">91409409</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="even">
+<td>2.65</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05180856</td>
+<td align="left">15</td>
+<td align="right">91409409</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="odd">
+<td>1.74</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg20750528</td>
+<td align="left">15</td>
+<td align="right">91455321</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.66</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg20750528</td>
+<td align="left">15</td>
+<td align="right">91455321</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.75</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg12984356</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="even">
+<td>2.67</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg12984356</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="odd">
+<td>1.76</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg18661868</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="even">
+<td>2.68</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg18661868</td>
+<td align="left">15</td>
+<td align="right">91407994</td>
+<td align="right">91447867</td>
+</tr>
+<tr class="odd">
+<td>1.77</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg18472881</td>
+<td align="left">15</td>
+<td align="right">91453131</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.69</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg18472881</td>
+<td align="left">15</td>
+<td align="right">91453131</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.78</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg11727029</td>
+<td align="left">15</td>
+<td align="right">91458485</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.70</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg11727029</td>
+<td align="left">15</td>
+<td align="right">91458485</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.79</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg20622470</td>
+<td align="left">15</td>
+<td align="right">91426560</td>
+<td align="right">91465224</td>
+</tr>
+<tr class="even">
+<td>2.71</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg20622470</td>
+<td align="left">15</td>
+<td align="right">91426560</td>
+<td align="right">91465224</td>
+</tr>
+<tr class="odd">
+<td>1.80</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg08939371</td>
+<td align="left">15</td>
+<td align="right">91453131</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.72</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08939371</td>
+<td align="left">15</td>
+<td align="right">91453131</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.81</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg12015851</td>
+<td align="left">15</td>
+<td align="right">91405684</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="even">
+<td>2.73</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg12015851</td>
+<td align="left">15</td>
+<td align="right">91405684</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="odd">
+<td>1.82</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg25639557</td>
+<td align="left">15</td>
+<td align="right">91403646</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="even">
+<td>2.74</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg25639557</td>
+<td align="left">15</td>
+<td align="right">91403646</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="odd">
+<td>1.83</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg12555233</td>
+<td align="left">15</td>
+<td align="right">91435422</td>
+<td align="right">91474738</td>
+</tr>
+<tr class="even">
+<td>2.75</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg12555233</td>
+<td align="left">15</td>
+<td align="right">91435422</td>
+<td align="right">91474738</td>
+</tr>
+<tr class="odd">
+<td>1.84</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg08740748</td>
+<td align="left">15</td>
+<td align="right">91426560</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="even">
+<td>2.76</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08740748</td>
+<td align="left">15</td>
+<td align="right">91426560</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="odd">
+<td>1.85</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05107601</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.77</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05107601</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.86</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg14231966</td>
+<td align="left">15</td>
+<td align="right">91404788</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="even">
+<td>2.78</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg14231966</td>
+<td align="left">15</td>
+<td align="right">91404788</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="odd">
+<td>1.87</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg07281959</td>
+<td align="left">15</td>
+<td align="right">91401467</td>
+<td align="right">91441207</td>
+</tr>
+<tr class="even">
+<td>2.79</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg07281959</td>
+<td align="left">15</td>
+<td align="right">91401467</td>
+<td align="right">91441207</td>
+</tr>
+<tr class="odd">
+<td>1.88</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg01482407</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="even">
+<td>2.80</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg01482407</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="odd">
+<td>1.89</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg23121096</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91456102</td>
+</tr>
+<tr class="even">
+<td>2.81</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg23121096</td>
+<td align="left">15</td>
+<td align="right">91416550</td>
+<td align="right">91456102</td>
+</tr>
+<tr class="odd">
+<td>1.90</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg23071286</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91376978</td>
+</tr>
+<tr class="even">
+<td>1.91</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg13215555</td>
+<td align="left">15</td>
+<td align="right">91455618</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.82</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13215555</td>
+<td align="left">15</td>
+<td align="right">91455618</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.92</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg11117530</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91430647</td>
+</tr>
+<tr class="odd">
+<td>2.83</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg11117530</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91430647</td>
+</tr>
+<tr class="even">
+<td>1.93</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg10345131</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.84</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg10345131</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.94</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg23056966</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.85</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg23056966</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.95</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg11145826</td>
+<td align="left">15</td>
+<td align="right">91457810</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.86</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg11145826</td>
+<td align="left">15</td>
+<td align="right">91457810</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.96</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg12075901</td>
+<td align="left">15</td>
+<td align="right">91403646</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="odd">
+<td>2.87</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg12075901</td>
+<td align="left">15</td>
+<td align="right">91403646</td>
+<td align="right">91443170</td>
+</tr>
+<tr class="even">
+<td>1.97</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg13417485</td>
+<td align="left">15</td>
+<td align="right">91476055</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.88</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13417485</td>
+<td align="left">15</td>
+<td align="right">91476055</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.98</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg08718071</td>
+<td align="left">15</td>
+<td align="right">91455618</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.89</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08718071</td>
+<td align="left">15</td>
+<td align="right">91455618</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>1.99</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg22364906</td>
+<td align="left">15</td>
+<td align="right">91361936</td>
+<td align="right">91386009</td>
+</tr>
+<tr class="odd">
+<td>1.100</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg09254686</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.90</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg09254686</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.101</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg05497857</td>
+<td align="left">15</td>
+<td align="right">91435172</td>
+<td align="right">91474236</td>
+</tr>
+<tr class="even">
+<td>2.91</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg05497857</td>
+<td align="left">15</td>
+<td align="right">91435172</td>
+<td align="right">91474236</td>
+</tr>
+<tr class="odd">
+<td>1.102</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg18704421</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="even">
+<td>2.92</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg18704421</td>
+<td align="left">15</td>
+<td align="right">91427612</td>
+<td align="right">91466262</td>
+</tr>
+<tr class="odd">
+<td>1.103</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg23208881</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91431470</td>
+</tr>
+<tr class="even">
+<td>2.93</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg23208881</td>
+<td align="left">15</td>
+<td align="right">91397733</td>
+<td align="right">91431470</td>
+</tr>
+<tr class="odd">
+<td>1.104</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg24374996</td>
+<td align="left">15</td>
+<td align="right">91458485</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.94</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg24374996</td>
+<td align="left">15</td>
+<td align="right">91458485</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.105</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">ch.15.1582754F</td>
+<td align="left">15</td>
+<td align="right">91476055</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.95</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">ch.15.1582754F</td>
+<td align="left">15</td>
+<td align="right">91476055</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.106</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg06480138</td>
+<td align="left">15</td>
+<td align="right">91457810</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.96</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg06480138</td>
+<td align="left">15</td>
+<td align="right">91457810</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.107</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg01456243</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.97</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg01456243</td>
+<td align="left">15</td>
+<td align="right">91459475</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.108</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg27626899</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.98</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg27626899</td>
+<td align="left">15</td>
+<td align="right">91456102</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>1.109</td>
+<td align="left">ENSG00000140564</td>
+<td align="left">FURIN</td>
+<td align="left">cg02374944</td>
+<td align="left">15</td>
+<td align="right">91443170</td>
+<td align="right">91482935</td>
+</tr>
+<tr class="even">
+<td>2.99</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg02374944</td>
+<td align="left">15</td>
+<td align="right">91443170</td>
+<td align="right">91482935</td>
+</tr>
+<tr class="odd">
+<td>2.100</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg23684204</td>
+<td align="left">15</td>
+<td align="right">91478050</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.101</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg22570213</td>
+<td align="left">15</td>
+<td align="right">91478050</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.102</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg22110973</td>
+<td align="left">15</td>
+<td align="right">91479971</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.103</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg25526519</td>
+<td align="left">15</td>
+<td align="right">91479971</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.104</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg04851675</td>
+<td align="left">15</td>
+<td align="right">91478544</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.105</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg01368872</td>
+<td align="left">15</td>
+<td align="right">91478544</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.106</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg01710897</td>
+<td align="left">15</td>
+<td align="right">91478050</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.107</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08762750</td>
+<td align="left">15</td>
+<td align="right">91478050</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.108</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13287772</td>
+<td align="left">15</td>
+<td align="right">91477461</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.109</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg22288577</td>
+<td align="left">15</td>
+<td align="right">91478544</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.110</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg19822110</td>
+<td align="left">15</td>
+<td align="right">91482935</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.111</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg13170728</td>
+<td align="left">15</td>
+<td align="right">91485049</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.112</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg01641174</td>
+<td align="left">15</td>
+<td align="right">91477461</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.113</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg08640790</td>
+<td align="left">15</td>
+<td align="right">91478544</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.114</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg18830241</td>
+<td align="left">15</td>
+<td align="right">91486305</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.115</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg14696334</td>
+<td align="left">15</td>
+<td align="right">91480720</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.116</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg07021696</td>
+<td align="left">15</td>
+<td align="right">91480822</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.117</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg07236925</td>
+<td align="left">15</td>
+<td align="right">91478544</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.118</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg12630461</td>
+<td align="left">15</td>
+<td align="right">91480010</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="even">
+<td>2.119</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg10077468</td>
+<td align="left">15</td>
+<td align="right">91478544</td>
+<td align="right">91488676</td>
+</tr>
+<tr class="odd">
+<td>2.120</td>
+<td align="left">ENSG00000182511</td>
+<td align="left">FES</td>
+<td align="left">cg10403171</td>
+<td align="left">15</td>
+<td align="right">91480802</td>
+<td align="right">91488676</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<p>The output is a list with two elements:</p>
+<ol style="list-style-type: decimal">
+<li><p>First element is a data frame containing the priors, likelihoods and Posteriors for each locus and each combination.</p></li>
+<li><p>Second element is the loci analyzed.</p></li>
+</ol>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">options</span>(<span class="dt">scipen =</span> <span class="dv">1</span>, <span class="dt">digits =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw">library</span>(moloc)</a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="kw">library</span>(foreach)</a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="kw">library</span>(doParallel)</a>
+<a class="sourceLine" id="cb9-5" data-line-number="5">moloc_genome &lt;-<span class="st"> </span><span class="kw">coloc.genome</span>(data_genome, bed, <span class="dt">prefix =</span> <span class="st">&quot;pref&quot;</span>, <span class="dt">save.SNP.info=</span><span class="ot">FALSE</span>, <span class="dt">cores=</span><span class="dv">20</span>, <span class="dt">have_alleles=</span><span class="ot">TRUE</span>, <span class="dt">bychrpos=</span><span class="ot">TRUE</span>, <span class="dt">prior_var=</span><span class="st">&quot;default&quot;</span>, <span class="dt">priors=</span><span class="kw">c</span>(<span class="fl">1e-04</span>, <span class="fl">1e-06</span>, <span class="fl">1e-07</span>), <span class="dt">min_nsnps =</span> <span class="dv">50</span>, <span class="dt">takelog =</span> <span class="ot">FALSE</span>, <span class="dt">write=</span><span class="ot">TRUE</span>, <span class="dt">outfolder =</span> <span class="st">&quot;test&quot;</span>, <span class="dt">forcePVAL =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb9-6" data-line-number="6"><span class="co"># Posteriors</span></a>
+<a class="sourceLine" id="cb9-7" data-line-number="7"><span class="kw">print</span>(moloc_genome[[<span class="dv">1</span>]])</a></code></pre></div>
+<pre><code>##   [1] ENSG00000140564_cg04510874 ENSG00000182511_cg04510874
+##   [3] ENSG00000140564_cg12644059 ENSG00000140564_cg05211768
+##   [5] ENSG00000182511_cg05211768 ENSG00000140564_cg02722434
+##   [7] ENSG00000140564_cg09169633 ENSG00000182511_cg09169633
+##   [9] ENSG00000140564_cg18247172 ENSG00000140564_cg19348484
+##  [11] ENSG00000182511_cg19348484 ENSG00000140564_cg24888049
+##  [13] ENSG00000182511_cg24888049 ENSG00000140564_cg11358405
+##  [15] ENSG00000140564_cg13947995 ENSG00000182511_cg13947995
+##  [17] ENSG00000140564_cg01321816 ENSG00000140564_cg13579205
+##  [19] ENSG00000182511_cg13579205 ENSG00000140564_cg26899598
+##  [21] ENSG00000182511_cg26899598 ENSG00000140564_cg06330618
+##  [23] ENSG00000182511_cg06330618 ENSG00000140564_cg13410000
+##  [25] ENSG00000140564_cg25647583 ENSG00000182511_cg25647583
+##  [27] ENSG00000140564_cg05122887 ENSG00000182511_cg05122887
+##  [29] ENSG00000140564_cg26405020 ENSG00000182511_cg26405020
+##  [31] ENSG00000140564_cg03209642 ENSG00000182511_cg03209642
+##  [33] ENSG00000140564_cg04612952 ENSG00000140564_cg22145651
+##  [35] ENSG00000182511_cg22145651 ENSG00000140564_cg20992439
+##  [37] ENSG00000182511_cg20992439 ENSG00000140564_cg01930518
+##  [39] ENSG00000182511_cg01930518 ENSG00000140564_cg25242556
+##  [41] ENSG00000182511_cg25242556 ENSG00000140564_cg20507228
+##  [43] ENSG00000182511_cg20507228 ENSG00000140564_cg08724371
+##  [45] ENSG00000182511_cg08724371 ENSG00000140564_cg07718650
+##  [47] ENSG00000182511_cg07718650 ENSG00000140564_cg02864248
+##  [49] ENSG00000182511_cg02864248 ENSG00000140564_cg26377677
+##  [51] ENSG00000182511_cg26377677 ENSG00000140564_cg04853284
+##  [53] ENSG00000182511_cg04853284 ENSG00000140564_cg24259688
+##  [55] ENSG00000182511_cg24259688 ENSG00000140564_cg17017272
+##  [57] ENSG00000182511_cg17017272 ENSG00000140564_cg16976547
+##  [59] ENSG00000182511_cg16976547 ENSG00000140564_cg19114277
+##  [61] ENSG00000182511_cg19114277 ENSG00000140564_cg17396638
+##  [63] ENSG00000182511_cg17396638 ENSG00000140564_cg16895464
+##  [65] ENSG00000182511_cg16895464 ENSG00000140564_cg14538437
+##  [67] ENSG00000140564_cg00630237 ENSG00000182511_cg00630237
+##  [69] ENSG00000140564_cg22196191 ENSG00000182511_cg22196191
+##  [71] ENSG00000140564_cg09397246 ENSG00000182511_cg09397246
+##  [73] ENSG00000140564_cg13798842 ENSG00000182511_cg13798842
+##  [75] ENSG00000140564_cg00758797 ENSG00000182511_cg00758797
+##  [77] ENSG00000140564_cg05719672 ENSG00000182511_cg05719672
+##  [79] ENSG00000140564_cg00207731 ENSG00000182511_cg00207731
+##  [81] ENSG00000140564_cg05131526 ENSG00000182511_cg05131526
+##  [83] ENSG00000140564_cg03403298 ENSG00000182511_cg03403298
+##  [85] ENSG00000140564_cg05469396 ENSG00000182511_cg05469396
+##  [87] ENSG00000140564_cg21472639 ENSG00000182511_cg21472639
+##  [89] ENSG00000140564_cg25606844 ENSG00000140564_cg11582017
+##  [91] ENSG00000182511_cg11582017 ENSG00000140564_cg05180856
+##  [93] ENSG00000182511_cg05180856 ENSG00000140564_cg12984356
+##  [95] ENSG00000182511_cg12984356 ENSG00000140564_cg18661868
+##  [97] ENSG00000182511_cg18661868 ENSG00000140564_cg20622470
+##  [99] ENSG00000182511_cg20622470 ENSG00000140564_cg12015851
+## [101] ENSG00000182511_cg12015851 ENSG00000140564_cg25639557
+## [103] ENSG00000182511_cg25639557 ENSG00000140564_cg08740748
+## [105] ENSG00000182511_cg08740748 ENSG00000140564_cg14231966
+## [107] ENSG00000182511_cg14231966 ENSG00000140564_cg07281959
+## [109] ENSG00000182511_cg07281959 ENSG00000140564_cg01482407
+## [111] ENSG00000182511_cg01482407 ENSG00000140564_cg23121096
+## [113] ENSG00000182511_cg23121096 ENSG00000140564_cg23071286
+## [115] ENSG00000140564_cg12075901 ENSG00000182511_cg12075901
+## [117] ENSG00000140564_cg22364906 ENSG00000140564_cg18704421
+## [119] ENSG00000182511_cg18704421 ENSG00000182511_cg02374944
+## 120 Levels: ENSG00000140564_cg04510874 ... ENSG00000182511_cg02374944</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co"># Bed file of loci analyzed</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="kw">print</span>(moloc_genome[[<span class="dv">2</span>]])</a></code></pre></div>
+<pre><code>##   [1] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+##  [24] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+##  [47] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+##  [70] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+##  [93] 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+## [116] 15 15 15 15 15</code></pre>
+<p>The columns are:</p>
+<ul>
+<li><p><code>ProbeID</code>: refers to the expression data;</p></li>
+<li><p><code>ProbeIDmet</code>: refers to the methylation data;</p></li>
+<li><p><code>CHR</code>, <code>START</code>, <code>STOP</code> refer to the region defined by the bed file;</p></li>
+<li><p><code>nsnps</code> is the number of SNPs analyzed per region;</p></li>
+<li><p><code>minpi</code> are the minimum p-values for each analyzed dataset in the region;</p></li>
+<li><p><code>minpi.snp</code> are the snps with the minimum p-values;</p></li>
+<li><p><code>bf.a</code> are the bayes factors supporting association with GWAS;</p></li>
+<li><p><code>bf.a,b</code> are the bayes factors supporting association of one variant with GWAS and a different variant for eQTL;</p></li>
+<li><p><code>bf.ac,b</code> are the bayes factors supporting association of the same variant with GWAS and mQTL, and a different variant for eQTL;</p></li>
+</ul>
+<p>…</p>
+<ul>
+<li><code>PPA.a</code> are the corresponding posterior probabilities;</li>
+</ul>
+<p>…</p>
+<ul>
+<li><code>best.snp.a</code> is the SNP with the highest probability for GWAS;</li>
+</ul>
+<p>…</p>
+<ul>
+<li><code>best.snp.PPA.a</code> is the SNP posterior probability;</li>
+</ul>
+<p>…</p>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-Giambartolomei2014">
+<p>Giambartolomei, Claudia, Damjan Vukcevic, Eric E. Schadt, Lude Franke, Aroon D. Hingorani, Chris Wallace, and Vincent Plagnol. 2014. “Bayesian Test for Colocalisation Between Pairs of Genetic Association Studies Using Summary Statistics.” <em>PLoS Genet</em> 10 (5): e1004383. <a href="https://doi.org/10.1371/journal.pgen.1004383">https://doi.org/10.1371/journal.pgen.1004383</a>.</p>
+</div>
+<div id="ref-Wakefield2009">
+<p>Wakefield, Jon. 2009. “Bayes Factors for Genome-Wide Association Studies: Comparison with P-Values.” <em>Genetic Epidemiology</em> 33 (1): 79–86. <a href="http://onlinelibrary.wiley.com/doi/10.1002/gepi.20359/full">http://onlinelibrary.wiley.com/doi/10.1002/gepi.20359/full</a>.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
