@@ -361,7 +361,7 @@ config_coloc <- function(ABF, n_files, priors){
 #' 
 #' @keywords internal
 #' @author Jimmy Liu, Claudia Giambartolomei
-snp_ppa <- function(ABF, n_files, config_ppas){
+snp_ppa <- function(ABF, n_files, config_ppas, save.SNP.info){
     d <- letters[1:n_files]
     configs_cases <- do.call(expand.grid, lapply(d, function(x) c("", x)))[-1,]
     configs <- do.call(paste0, configs_cases)
@@ -406,7 +406,12 @@ snp_ppa <- function(ABF, n_files, config_ppas){
      # names(coloc_ppas) <- d
      best_snp = cbind.data.frame(coloc_ppas, best.snp.coloc)
      rownames(best_snp) <- configs
-     return(best_snp)
+     if (!save.SNP.info) {
+         return(best_snp)
+     }
+     if (save.SNP.info) {
+         return(list(best_snp, SNP.PP.H4.df))
+     }
 }
 
 
@@ -482,15 +487,22 @@ moloc_test <- function(listData, prior_var=c(0.01, 0.1, 0.5), priors=c(1e-04, 1e
     }
     ABF <- adjust_bfs(listData=listData, prior_var=prior_var)
     lkl <- config_coloc(ABF, n_files, priors)
-    snp <- snp_ppa(ABF, n_files=n_files, config_ppas=lkl[[1]])
+    snp <- snp_ppa(ABF, n_files=n_files, config_ppas=lkl[[1]], save.SNP.info)
     nsnps <- lkl[[2]]
     lkl <- lkl[[1]]
     # Report per locus likelihoods (adjusted for nsnps)
     # lkl$sumbf <- lkl$sumbf - log(nsnps); for the no coloc it's -2* log(nsnps)
     lkl <- lkl[,c("prior", "sumbf", "logBF_locus", "PPA")]
-    res <- list(lkl, nsnps, snp)
+    if (!save.SNP.info) {
+        res <- list(lkl, nsnps, snp[[1]])
+    }
+    # res <- list(lkl, nsnps, snp)
     if (save.SNP.info) {
-       snp_info = merge(data.frame(listData), data.frame(lABF=ABF), by.x="SNP", by.y="row.names")     
+       snp_info = merge(data.frame(listData), data.frame(lABF=ABF), by.x="SNP", by.y="row.names")
+       SNP.PP.H4.df = snp[[2]]
+       names(SNP.PP.H4.df) = paste("SNP.PP.", names(SNP.PP.H4.df), sep="")
+       SNP.PP.H4.df$SNP = rownames(SNP.PP.H4.df)
+       snp_info = merge(snp_info, SNP.PP.H4.df, by="SNP")
        res <- list(lkl, nsnps, snp, snp_info)
        }
     names(res) <- c("priors_lkl_ppa", "nsnps", "best_snp")
