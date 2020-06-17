@@ -494,9 +494,8 @@ moloc_test <- function(listData, prior_var=c(0.01, 0.1, 0.5), priors=c(1e-04, 1e
     # lkl$sumbf <- lkl$sumbf - log(nsnps); for the no coloc it's -2* log(nsnps)
     lkl <- lkl[,c("prior", "sumbf", "logBF_locus", "PPA")]
     if (!save.SNP.info) {
-        res <- list(lkl, nsnps, snp[[1]])
+        res <- list(lkl, nsnps, snp)
     }
-    # res <- list(lkl, nsnps, snp)
     if (save.SNP.info) {
        snp_info = merge(data.frame(listData), data.frame(lABF=ABF), by.x="SNP", by.y="row.names")
        SNP.PP.H4.df = snp[[2]]
