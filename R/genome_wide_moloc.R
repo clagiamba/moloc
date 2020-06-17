@@ -50,7 +50,7 @@
 #' 
 #' @export
 #' @author Claudia Giambartolomei
-coloc.genome <- function(listData, bed, prefix = "pref", save.SNP.info=FALSE, cores=20, have_alleles=TRUE, bychrpos=TRUE, prior_var="default", priors=c(1e-04, 1e-06, 1e-07), min_nsnps = 50, takelog = FALSE, write=TRUE, outfolder = "test", forcePVAL = FALSE){
+coloc.genome <- function(listData, bed, prefix = "pref", save.SNP.info=FALSE, cores=20, have_alleles=TRUE, bychrpos=TRUE, prior_var="default", priors=c(1e-04, 1e-06, 1e-07), min_nsnps = 50, takelog = FALSE, write=TRUE, outfolder = "test", forcePVAL = FALSE, compare_coloc = TRUE){
 # if there is a BETA in the data, coloc will use the BETA and SE, to force use of PVAL instead use forcePVAL = TRUE
 
   ########
@@ -252,10 +252,16 @@ coloc.genome <- function(listData, bed, prefix = "pref", save.SNP.info=FALSE, co
               bf = moloc$priors_lkl_ppa$sumbf # locus BF before priors
               names(bf) = paste("bf.",  n, sep="")
               
-              best.n =  rownames(moloc$best_snp)
-              best.snp.PPA= as.data.frame(signif(t(moloc$best_snp$coloc_ppas), digits=2))
+              if (!save.SNP.info) {
+                  snp.info = moloc$best_snp
+              }
+              if (save.SNP.info) {
+                  snp.info = moloc$best_snp[[1]]
+              }
+              best.n =  rownames(snp.info)
+              best.snp.PPA= as.data.frame(signif(t(snp.info$coloc_ppas), digits=2))
               names(best.snp.PPA) = paste("best.snp.PPA.",  best.n, sep="")
-              best.snp= as.data.frame(t(as.character(moloc$best_snp$best.snp.coloc)))
+              best.snp= as.data.frame(t(as.character(snp.info$best.snp.coloc)))
               names(best.snp) = paste("best.snp.",  best.n, sep="")
               if (any(is.na(ppa))) stop("Moloc gives missing values for ", bed[i,])
 
@@ -269,7 +275,7 @@ coloc.genome <- function(listData, bed, prefix = "pref", save.SNP.info=FALSE, co
               best.snp.betas.df =c()
               for (d in 1:length(listRegion)) {
                  best.snp.betas =c()
-                 for (s in (as.character(moloc$best_snp$best.snp.coloc))) {
+                 for (s in (as.character(snp.info$best.snp.coloc))) {
                  b <- signif(listRegion[[d]]$BETA[listRegion[[d]]$SNP==s], digits=3)
                 best.snp.betas = c(best.snp.betas, b)
                 }
@@ -281,7 +287,7 @@ coloc.genome <- function(listData, bed, prefix = "pref", save.SNP.info=FALSE, co
               best.snp.se.df =c()
               for (d in 1:length(listRegion)) {
                  best.snp.se =c()
-                 for (s in (as.character(moloc$best_snp$best.snp.coloc))) {
+                 for (s in (as.character(snp.info$best.snp.coloc))) {
                  b = signif(listRegion[[d]]$SE[listRegion[[d]]$SNP==s], digits=3)
                  best.snp.se = c(best.snp.se, b)
                  }
@@ -320,7 +326,64 @@ coloc.genome <- function(listData, bed, prefix = "pref", save.SNP.info=FALSE, co
               if (addbeta) res = cbind(res, best.snp.betas, best.snp.se)
               
               #res.all = rbind(res.all, res)
-           
+              
+
+####***### COLOC OLD
+
+if (compare_coloc) {
+    print("Note: This computes COLOC using the first two datasets. When using two traits, PPA.ab and COLOC_ab are slightly diffeent becasue of approximations.")
+    if (length(listData) > 2) warning("Using more than two traits, COLOC and moloc are not directly comparable")
+    require(coloc)
+    # useBETA = TRUE
+    p1_coloc = 1e-04; p2_coloc = 1e-04; p12_coloc = 10^-5
+    
+    # Add type
+    for (j in 1:length(listRegion)) {
+        listRegion[[j]]$type <- ifelse("Ncases" %in% names(listRegion[[j]]), "cc", "quant")
+        if (unique(listRegion[[j]]$type)=="quant") listRegion[[j]]$s = rep(0.5, length(listRegion[[j]]$BETA))
+        if (unique(listRegion[[j]]$type)=="cc") listRegion[[j]]$s = listRegion[[j]]$Ncases/listRegion[[j]]$N
+    }
+    if (!haveBETA) {
+        dataset.biom = list(snp = listRegion[[1]]$SNP, pvalues = listRegion[[1]]$PVAL,
+        N = listRegion[[1]]$N, s = listRegion[[1]]$s, type = unique(listRegion[[1]]$type), MAF=listRegion[[1]]$MAF)
+        dataset.eqtl = list(snp = listRegion[[2]]$SNP, pvalues = listRegion[[2]]$PVAL,
+        N = listRegion[[2]]$N, s = listRegion[[2]]$s, type = unique(listRegion[[2]]$type), MAF=listRegion[[2]]$MAF)
+    } else {
+        dataset.biom = list(snp = listRegion[[1]]$SNP, beta = listRegion[[1]]$BETA, varbeta= (listRegion[[1]]$SE)^2, s=listRegion[[1]]$s, type = unique(listRegion[[1]]$type), MAF=listRegion[[1]]$MAF, N=listRegion[[1]]$N) #, sdY=unique(merged.data$sdY.biom))
+        dataset.eqtl = list(snp = listRegion[[2]]$SNP, beta = listRegion[[2]]$BETA, varbeta= (listRegion[[2]]$SE)^2, s=listRegion[[2]]$s, type = unique(listRegion[[2]]$type), MAF=listRegion[[2]]$MAF, N=listRegion[[2]]$N)
+    }
+    
+    
+    ### COLOC OLD
+    capture.output(coloc.res <- coloc.abf(dataset.biom, dataset.eqtl, p1 = p1_coloc, p2 = p2_coloc, p12 = p12_coloc))
+    pp0       <- as.numeric(coloc.res$summary[2])
+    pp1       <- as.numeric(coloc.res$summary[3])
+    pp2       <- as.numeric(coloc.res$summary[4])
+    pp3       <- as.numeric(coloc.res$summary[5])
+    pp4       <- as.numeric(coloc.res$summary[6])
+    
+    min.pval.biom <- min(listRegion[[1]]$PVAL)
+    min.pval.eqtl <- min(listRegion[[2]]$PVAL)
+    min.pval.snp.biom <- listRegion[[1]][which.min(listRegion[[1]]$PVAL), "SNP"]
+    min.pval.snp.eqtl <- listRegion[[2]][which.min(listRegion[[2]]$PVAL), "SNP"]
+    min.pval.beta.biom <- listRegion[[1]][which.min(listRegion[[1]]$PVAL), "BETA"]
+    min.pval.beta.eqtl <- listRegion[[2]][which.min(listRegion[[2]]$PVAL), "BETA"]
+    
+    best.causal = as.character(coloc.res$results$snp[which.max(coloc.res$results$SNP.PP.H4)])
+    best.causal.pval.biom <- listRegion[[1]][listRegion[[1]]$SNP == best.causal, "PVAL"]
+    best.causal.pval.eqtl <- listRegion[[2]][listRegion[[2]]$SNP == best.causal, "PVAL"]
+    best.causal.beta.biom <- listRegion[[1]][listRegion[[1]]$SNP == best.causal, "BETA"]
+    best.causal.beta.eqtl <- listRegion[[2]][listRegion[[2]]$SNP == best.causal, "BETA"]
+    
+    
+    coloc.res = data.frame(min.pval.biom = min.pval.biom, min.pval.eqtl=min.pval.eqtl, min.pval.snp.biom = min.pval.snp.biom,  min.pval.snp.eqtl = min.pval.snp.eqtl, min.pval.beta.biom = min.pval.beta.biom, min.pval.beta.eqtl = min.pval.beta.eqtl, best.causal=best.causal, best.causal.pval.biom = best.causal.pval.biom, best.causal.pval.eqtl = best.causal.pval.eqtl, best.causal.beta.biom = best.causal.beta.biom, best.causal.beta.eqtl = best.causal.beta.eqtl, COLOC_zero=pp0, COLOC_a=pp1, COLOC_b=pp2, COLOC_a.b=pp3, COLOC_ab=pp4)
+    res = cbind(res, coloc.res)
+    
+}
+
+###########*******
+
+
            } # if nsnps>50 # after finding common alelles if have_alleles = TRUE
            } # if nrow(listRegion[[1]])>0  # first matching of SNPs across data frames
            } #  matches_in_dfs
