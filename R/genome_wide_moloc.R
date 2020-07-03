@@ -95,7 +95,11 @@ coloc.genome <- function(listData, bed, prefix = "pref", save.SNP.info=FALSE, co
   
   for (i in 1:length(listData)) {
     haveBETA = "BETA" %in% names(listData[[i]])
-    if (haveBETA) {
+    if (haveBETA &!forcePVAL) {
+        if (length(listData[[i]]$SE[is.na(listData[[i]]$SE)])>0) {
+            warning("There are missing SE in the data!")
+            listData[[i]] = subset(listData[[i]], !is.na(SE))
+        }
        if (length(listData[[i]]$BETA[listData[[i]]$BETA<0])>0) log=TRUE  else log=FALSE # if there are negative value, then it could be already logOR?
        if (!log) warning("Dataset ",  i, " looks like a case-control: log the betas! The betas will be logged if takelog is set to TRUE, otherwise log them beforehand")
        # before taking the log must remove the SNPs with beta = 0
@@ -340,20 +344,20 @@ if (compare_coloc) {
     # Add type
     for (j in 1:length(listRegion)) {
         listRegion[[j]]$type <- ifelse("Ncases" %in% names(listRegion[[j]]), "cc", "quant")
-        if (unique(listRegion[[j]]$type)=="quant") listRegion[[j]]$s = rep(0.5, length(listRegion[[j]]$BETA))
+        if (unique(listRegion[[j]]$type)=="quant") listRegion[[j]]$s = rep(0.5, length(listRegion[[j]]$N))
         if (unique(listRegion[[j]]$type)=="cc") listRegion[[j]]$s = listRegion[[j]]$Ncases/listRegion[[j]]$N
     }
-    if (!haveBETA) {
+    if (!haveBETA | forcePVAL) {
         dataset.biom = list(snp = listRegion[[1]]$SNP, pvalues = listRegion[[1]]$PVAL,
         N = listRegion[[1]]$N, s = listRegion[[1]]$s, type = unique(listRegion[[1]]$type), MAF=listRegion[[1]]$MAF)
         dataset.eqtl = list(snp = listRegion[[2]]$SNP, pvalues = listRegion[[2]]$PVAL,
         N = listRegion[[2]]$N, s = listRegion[[2]]$s, type = unique(listRegion[[2]]$type), MAF=listRegion[[2]]$MAF)
-    } else {
+    }
+    if (haveBETA & !forcePVAL) {
         dataset.biom = list(snp = listRegion[[1]]$SNP, beta = listRegion[[1]]$BETA, varbeta= (listRegion[[1]]$SE)^2, s=listRegion[[1]]$s, type = unique(listRegion[[1]]$type), MAF=listRegion[[1]]$MAF, N=listRegion[[1]]$N) #, sdY=unique(merged.data$sdY.biom))
         dataset.eqtl = list(snp = listRegion[[2]]$SNP, beta = listRegion[[2]]$BETA, varbeta= (listRegion[[2]]$SE)^2, s=listRegion[[2]]$s, type = unique(listRegion[[2]]$type), MAF=listRegion[[2]]$MAF, N=listRegion[[2]]$N)
     }
-    
-    
+
     ### COLOC OLD
     capture.output(coloc.res <- coloc.abf(dataset.biom, dataset.eqtl, p1 = p1_coloc, p2 = p2_coloc, p12 = p12_coloc))
     pp0       <- as.numeric(coloc.res$summary[2])
@@ -362,21 +366,7 @@ if (compare_coloc) {
     pp3       <- as.numeric(coloc.res$summary[5])
     pp4       <- as.numeric(coloc.res$summary[6])
     
-    min.pval.biom <- min(listRegion[[1]]$PVAL)
-    min.pval.eqtl <- min(listRegion[[2]]$PVAL)
-    min.pval.snp.biom <- listRegion[[1]][which.min(listRegion[[1]]$PVAL), "SNP"]
-    min.pval.snp.eqtl <- listRegion[[2]][which.min(listRegion[[2]]$PVAL), "SNP"]
-    min.pval.beta.biom <- listRegion[[1]][which.min(listRegion[[1]]$PVAL), "BETA"]
-    min.pval.beta.eqtl <- listRegion[[2]][which.min(listRegion[[2]]$PVAL), "BETA"]
-    
-    best.causal = as.character(coloc.res$results$snp[which.max(coloc.res$results$SNP.PP.H4)])
-    best.causal.pval.biom <- listRegion[[1]][listRegion[[1]]$SNP == best.causal, "PVAL"]
-    best.causal.pval.eqtl <- listRegion[[2]][listRegion[[2]]$SNP == best.causal, "PVAL"]
-    best.causal.beta.biom <- listRegion[[1]][listRegion[[1]]$SNP == best.causal, "BETA"]
-    best.causal.beta.eqtl <- listRegion[[2]][listRegion[[2]]$SNP == best.causal, "BETA"]
-    
-    
-    coloc.res = data.frame(min.pval.biom = min.pval.biom, min.pval.eqtl=min.pval.eqtl, min.pval.snp.biom = min.pval.snp.biom,  min.pval.snp.eqtl = min.pval.snp.eqtl, min.pval.beta.biom = min.pval.beta.biom, min.pval.beta.eqtl = min.pval.beta.eqtl, best.causal=best.causal, best.causal.pval.biom = best.causal.pval.biom, best.causal.pval.eqtl = best.causal.pval.eqtl, best.causal.beta.biom = best.causal.beta.biom, best.causal.beta.eqtl = best.causal.beta.eqtl, COLOC_zero=pp0, COLOC_a=pp1, COLOC_b=pp2, COLOC_a.b=pp3, COLOC_ab=pp4)
+    coloc.res = data.frame(COLOC_zero=pp0, COLOC_a=pp1, COLOC_b=pp2, COLOC_a.b=pp3, COLOC_ab=pp4)
     res = cbind(res, coloc.res)
     
 }
