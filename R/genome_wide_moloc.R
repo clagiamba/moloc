@@ -339,7 +339,8 @@ if (compare_coloc) {
     if (length(listData) > 2) warning("Using more than two traits, COLOC and moloc are not directly comparable")
     require(coloc)
     # useBETA = TRUE
-    p1_coloc = 1e-04; p2_coloc = 1e-04; p12_coloc = 10^-5
+    # p1_coloc = 1e-04; p2_coloc = 1e-04; p12_coloc = 10^-5
+    p1_coloc = priors[1]; p2_coloc = priors[1]; p12_coloc = priors[2]
     
     # Add type
     for (j in 1:length(listRegion)) {
