@@ -458,7 +458,11 @@ moloc_test <- function(listData, prior_var=c(0.01, 0.1, 0.5), priors=c(1e-04, 1e
        # Add type
        listData[[i]]$type <- ifelse("Ncases" %in% names(listData[[i]]), "cc", "quant")
        # Add s
-       listData[[i]]$s <- ifelse("Ncases" %in% names(listData[[i]]), as.numeric(listData[[i]]$Ncases/listData[[i]]$N), 0.5)
+       # listData[[i]]$s = ifelse("Ncases" %in% names(listData[[i]]), as.numeric(listData[[i]]$Ncases/listData[[i]]$N), 0.5)
+       listData[[i]]$s = 0
+       if ("Ncases" %in% names(listData[[i]])) s=as.numeric(listData[[i]]$Ncases/listData[[i]]$N)
+       if (!("Ncases" %in% names(listData[[i]]))) s=0.5
+       listData[[i]]$s = s
        if ("BETA" %in% nd && "SE" %in% nd && !("MAF" %in% nd & "N" %in% nd || "sdY" %in% nd)) stop('Must give either MAF and N, or sdY')
        if ("BETA" %in% nd && "SE" %in% nd && ("MAF" %in% nd || "sdY" %in% nd)) {
           listData[[i]]$varbeta <- listData[[i]]$SE^2
